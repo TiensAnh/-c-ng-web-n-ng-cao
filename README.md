@@ -11,4 +11,4 @@ NGUYỄN VĂN ANH ĐỨC   23810310118
 - [Xem SRS User](dosc/SRS/user)
 
 ### Nâng cao
-- [Xem SRS Advanced](docs/SRS/SRS_chatbox_consulting.md)
+- [Xem SRS Advanced](docs/SRS_chatbox_consulting.md)
