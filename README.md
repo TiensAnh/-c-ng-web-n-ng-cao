@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🌏 Travel Booking Website
 
 Website đặt tour du lịch — **Node.js + Express + MySQL + Vanilla JS**
@@ -74,3 +75,19 @@ Dùng Live Server (VS Code) hoặc bất kỳ static server nào tại thư mụ
 - **Frontend**: HTML5, CSS3 (Variables + Grid + Flexbox), ES Modules
 - **Database**: MySQL 8+
 - **Chatbot**: Rule-based + keyword matching
+=======
+THÀNH VIÊN NHÓM
+NGUYỄN ĐỒNG TIẾN ANH 23810310080
+NGUYỄN VĂN ANH ĐỨC   23810310118
+ĐINH TRỌNG NGHĨA     23810310119
+## Tài liệu SRS
+
+### Admin
+- [Xem SRS Admin](dosc/SRS/admin)
+
+### User
+- [Xem SRS User](dosc/SRS/user)
+
+### Nâng cao
+- [Xem SRS Advanced](dosc/SRS/SRS_chatbox_consulting.md)
+>>>>>>> 9e35cde6c669d795b588d8f6555abfa33839daae
