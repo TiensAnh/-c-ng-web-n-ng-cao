@@ -1,0 +1,3 @@
+@media (max-width: 1024px) { .grid-3 { grid-template-columns: repeat(2,1fr); } .grid-4 { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 768px)  { .grid-3, .grid-4 { grid-template-columns: 1fr; } .hide-mobile { display:none !important; } }
+@media (max-width: 480px)  { .container { padding: 0 12px; } }

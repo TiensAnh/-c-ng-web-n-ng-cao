@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TravelVN — Đặt Tour Du Lịch Việt Nam</title>
+  <link rel="stylesheet" href="css/base.css"/>
+  <link rel="stylesheet" href="css/layout.css"/>
+  <link rel="stylesheet" href="css/components.css"/>
+  <link rel="stylesheet" href="css/responsive.css"/>
+</head>
+<body>
+  <div id="navbar-placeholder"></div>
+
+  <!-- Hero -->
+  <section style="background:linear-gradient(135deg,#03045e,#0077b6);color:#fff;padding:100px 0;text-align:center">
+    <h1 style="font-size:48px;margin-bottom:16px">Khám phá Việt Nam tuyệt đẹp</h1>
+    <p style="font-size:18px;opacity:.85;margin-bottom:32px">Hàng trăm tour du lịch hấp dẫn đang chờ bạn</p>
+    <a href="pages/tours/list.html" class="btn btn-primary" style="font-size:16px;padding:14px 36px">Xem tất cả tour</a>
+  </section>
+
+  <!-- Tour nổi bật -->
+  <section style="padding:64px 0">
+    <div class="container">
+      <h2 style="text-align:center;margin-bottom:36px;color:var(--dark)">Tour nổi bật</h2>
+      <div class="grid-3" id="tour-list">
+        <p style="text-align:center">Đang tải...</p>
+      </div>
+    </div>
+  </section>
+
+  <div id="footer-placeholder"></div>
+  <div id="chatbot-placeholder"></div>
+
+  <script type="module">
+    import { api } from './js/api.js';
+    import { fmt } from './js/utils.js';
+    const list = document.getElementById('tour-list');
+    api.get('/tours?limit=6').then(tours => {
+      list.innerHTML = tours.map(t => `
+        <div class="card">
+          <img src="${t.image ? 'http://localhost:5000/uploads/'+t.image : 'assets/images/placeholder.jpg'}" style="height:200px;object-fit:cover;width:100%">
+          <div style="padding:20px">
+            <h3 style="margin-bottom:8px">${t.name}</h3>
+            <p style="color:var(--gray);margin-bottom:12px">📍 ${t.location} · ${t.duration} ngày</p>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <strong style="color:var(--primary);font-size:18px">${fmt.price(t.price)}</strong>
+              <a href="pages/tours/detail.html?id=${t.id}" class="btn btn-primary">Xem ngay</a>
+            </div>
+          </div>
+        </div>`).join('');
+    });
+  </script>
+</body>
+</html>
