@@ -1,0 +1,79 @@
+/* Footer */
+.footer {
+  width: 100%;
+  background: #f5f7f8;
+  padding: 64px 32px;
+  margin-top: auto;
+}
+
+.footer-container {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 48px;
+  margin-bottom: 48px;
+}
+
+/* responsive giống md:grid-cols-4 */
+@media (min-width: 768px) {
+  .footer-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.footer-col {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.footer-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #191c1e;
+}
+
+.footer-desc {
+  font-size: 14px;
+  color: #727687;
+  line-height: 1.6;
+  max-width: 250px;
+}
+
+.footer-list {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-list li {
+  margin-bottom: 16px;
+}
+
+.footer-list a {
+  font-size: 14px;
+  color: #727687;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.footer-list a:hover {
+  color: #00a8ff; /* giống primary */
+}
+
+.footer-divider {
+  border-top: 1px solid #e0e3e6;
+  margin-bottom: 32px;
+}
+
+.footer-copy {
+  text-align: center;
+}
+
+.footer-copy p {
+  font-size: 14px;
+  color: #727687;
+}

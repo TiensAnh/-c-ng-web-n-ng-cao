@@ -1,0 +1,60 @@
+/* Popular Tours */
+.popular-tours {
+  padding: 48px 2rem;
+  background: #fff;
+}
+
+.popular-tours__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.popular-tours__title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+.popular-tours__see-all {
+  font-size: 14px;
+  color: #0a9af2;
+  text-decoration: none;
+}
+.popular-tours__see-all:hover { text-decoration: underline; }
+
+/* Filter chips */
+.popular-tours__filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.filter-chip {
+  font-size: 13px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  background: #fff;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.filter-chip:hover { border-color: #0a9af2; color: #0a9af2; }
+.filter-chip--active {
+  background: #e6f1fb;
+  color: #0a5fa8;
+  border-color: #0a9af2;
+}
+
+/* Grid */
+.tour-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.tour-grid__empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #888;
+  padding: 40px 0;
+}

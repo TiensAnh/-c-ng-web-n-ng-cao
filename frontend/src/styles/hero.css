@@ -1,0 +1,21 @@
+ .background-img{
+        padding-top: 85px; 
+        background-image:url(../assets/Hero_img.png);
+        height: 80vh;
+        background-size:cover;
+        background-position:center;
+        display:flex;
+        flex-direction:column;
+    }
+    .hero{
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        flex:1;
+    }
+    .hero_title{
+        text-align:center;
+        font-weight:bold;
+        font-size:36px;
+        color: #ffff;
+    }
