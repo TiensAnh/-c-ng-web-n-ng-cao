@@ -1,9 +1,5 @@
 import { useState } from 'react';
-<<<<<<< HEAD
-import { submitContactForm } from '../services/siteContentService';
-=======
 import { submitContactForm } from '../services/public/siteContentService';
->>>>>>> 8cf1a3989029571942876b8f0683261f93b85e40
 
 const initialFormState = {
   name: '',

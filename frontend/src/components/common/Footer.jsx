@@ -1,23 +1,14 @@
 import { Link } from 'react-router-dom';
-<<<<<<< HEAD
-import { footerLinks } from '../../services/siteContentService';
-=======
 import brandLogo from '../../assets/images/Logo.png';
 import { footerLinks } from '../../services/public/siteContentService';
->>>>>>> 8cf1a3989029571942876b8f0683261f93b85e40
 
 function Footer() {
   return (
     <footer className="site-footer">
       <div className="site-footer__inner content-container">
         <div className="site-footer__brand-block">
-<<<<<<< HEAD
-          <Link className="site-footer__brand" to="/">
-            ADN Travel
-=======
           <Link className="site-footer__brand" to="/" aria-label="ADN Travel home">
             <img className="site-footer__brand-logo" src={brandLogo} alt="ADN Travel" />
->>>>>>> 8cf1a3989029571942876b8f0683261f93b85e40
           </Link>
           <p className="site-footer__copyright">
             © {new Date().getFullYear()} ADN Travel. All rights reserved.

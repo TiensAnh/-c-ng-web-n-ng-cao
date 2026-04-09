@@ -14,46 +14,11 @@
 .site-footer__brand-block {
   display: flex;
   flex-direction: column;
-<<<<<<< HEAD
-=======
   align-items: flex-start;
->>>>>>> 8cf1a3989029571942876b8f0683261f93b85e40
   gap: 0.45rem;
 }
 
 .site-footer__brand {
-<<<<<<< HEAD
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-weight: 800;
-  color: var(--primary);
-}
-
-.site-footer__copyright,
-.site-footer__link {
-  color: #7a8595;
-  font-size: 0.8rem;
-}
-
-.site-footer__links {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1.5rem;
-}
-
-.site-footer__socials {
-  display: flex;
-  gap: 0.7rem;
-  color: #7a8595;
-}
-
-@media (max-width: 767px) {
-  .site-footer__inner {
-    flex-direction: column;
-    text-align: center;
-  }
-}
-=======
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -101,4 +66,3 @@
     align-items: center;
   }
 }
->>>>>>> 8cf1a3989029571942876b8f0683261f93b85e40

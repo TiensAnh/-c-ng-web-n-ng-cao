@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-import { toursContent } from '../../services/siteContentService';
-
-function ToursSidebar({
-  priceRange,
-=======
 import { toursContent } from '../../services/public/siteContentService';
 
 function ToursSidebar({
@@ -11,7 +5,6 @@ function ToursSidebar({
   isShowingAll,
   priceRange,
   resetFilters,
->>>>>>> 8cf1a3989029571942876b8f0683261f93b85e40
   searchText,
   selectedDestinations,
   selectedDuration,
@@ -25,19 +18,12 @@ function ToursSidebar({
   return (
     <aside className="tours-sidebar">
       <div className="tours-sidebar__panel">
-<<<<<<< HEAD
-        <h2 className="tours-sidebar__title">
-          <span className="material-symbols-outlined">filter_list</span>
-          Bộ lọc tìm kiếm
-        </h2>
-=======
         <div className="tours-sidebar__title-row">
           <h2 className="tours-sidebar__title">
             <span className="material-symbols-outlined">filter_list</span>
             Bộ lọc tìm kiếm
           </h2>
         </div>
->>>>>>> 8cf1a3989029571942876b8f0683261f93b85e40
 
         <div className="tours-sidebar__group">
           <label className="tours-sidebar__label" htmlFor="tour-search">
@@ -56,8 +42,6 @@ function ToursSidebar({
         <div className="tours-sidebar__group">
           <span className="tours-sidebar__label">Điểm đến</span>
           <div className="tours-sidebar__stack">
-<<<<<<< HEAD
-=======
             <label className="checkbox-row">
               <input
                 type="checkbox"
@@ -66,7 +50,6 @@ function ToursSidebar({
               />
               <span>Tất cả</span>
             </label>
->>>>>>> 8cf1a3989029571942876b8f0683261f93b85e40
             {toursContent.destinations.map((destination) => (
               <label key={destination} className="checkbox-row">
                 <input
@@ -99,8 +82,6 @@ function ToursSidebar({
         <div className="tours-sidebar__group">
           <span className="tours-sidebar__label">Thời gian</span>
           <div className="chip-grid">
-<<<<<<< HEAD
-=======
             <button
               type="button"
               className={`filter-chip${selectedDuration === 'all' ? ' filter-chip--active' : ''}`}
@@ -108,7 +89,6 @@ function ToursSidebar({
             >
               Tất cả
             </button>
->>>>>>> 8cf1a3989029571942876b8f0683261f93b85e40
             {toursContent.durationOptions.map((option) => (
               <button
                 key={option}
