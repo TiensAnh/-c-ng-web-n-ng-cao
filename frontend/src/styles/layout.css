@@ -1,0 +1,37 @@
+.site-shell {
+  min-height: 100vh;
+  background: var(--surface);
+}
+
+.page-shell {
+  padding-top: 5rem;
+}
+
+.section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.section-heading__title {
+  margin: 0 0 0.4rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.section-heading__description {
+  margin: 0;
+  color: var(--outline);
+  font-size: 1rem;
+}
+
+@media (max-width: 767px) {
+  .section-heading {
+    align-items: start;
+    flex-direction: column;
+  }
+}

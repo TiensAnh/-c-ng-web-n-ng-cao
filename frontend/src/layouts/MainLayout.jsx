@@ -1,13 +1,17 @@
-import Footer from '../components/Footer'
-import Header from '../components/Header'
+import { Outlet } from 'react-router-dom';
+import Navbar from '../components/common/Navbar';
+import Footer from '../components/common/Footer';
+import useScrollToTop from '../hooks/useScrollToTop';
 
-function MainLayout({ children }) {
+function MainLayout() {
+  useScrollToTop();
+
   return (
-    <div>
-      <Header />
-
-      {children}
-
+    <div className="site-shell">
+      <Navbar />
+      <main className="page-shell">
+        <Outlet />
+      </main>
       <Footer />
     </div>
   );
