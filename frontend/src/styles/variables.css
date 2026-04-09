@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:FILL@0..1&display=swap');
+
+:root {
+  --background: #f6f9ff;
+  --surface: #f6f9ff;
+  --surface-low: #eff4fb;
+  --surface-lowest: #ffffff;
+  --surface-high: #e4e9f0;
+  --surface-highest: #dee3ea;
+  --surface-variant: #dee3ea;
+  --primary: #0049e3;
+  --primary-strong: #0038b6;
+  --primary-soft: #3264ff;
+  --secondary: #485f86;
+  --secondary-soft: #bbd2ff;
+  --tertiary: #735600;
+  --tertiary-soft: #ffdf9e;
+  --text: #171c21;
+  --text-muted: #434655;
+  --outline: #747687;
+  --outline-soft: rgba(195, 197, 216, 0.4);
+  --inverse: #1e2329;
+  --inverse-text: #ecf1f8;
+  --shadow-soft: 0 12px 32px rgba(15, 41, 77, 0.08);
+  --shadow-deep: 0 20px 50px rgba(15, 41, 77, 0.18);
+  --gradient-primary: linear-gradient(135deg, #0049e3 0%, #3264ff 100%);
+  --container-width: min(1280px, calc(100% - 2rem));
+  --radius-sm: 0.75rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
+  --radius-xxl: 3rem;
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  font-size: 1.2rem;
+  line-height: 1;
+}

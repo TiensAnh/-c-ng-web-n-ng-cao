@@ -1,0 +1,225 @@
+.tours-page__layout {
+  display: grid;
+  grid-template-columns: 19rem minmax(0, 1fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+.tours-sidebar {
+  display: grid;
+  gap: 1.5rem;
+  position: sticky;
+  top: 6rem;
+}
+
+.tours-sidebar__panel {
+  border-radius: var(--radius-lg);
+  background: var(--surface-lowest);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-soft);
+}
+
+.tours-sidebar__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 1.5rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.3rem;
+}
+
+.tours-sidebar__group + .tours-sidebar__group {
+  margin-top: 1.5rem;
+}
+
+.tours-sidebar__label {
+  display: block;
+  margin-bottom: 0.8rem;
+  color: var(--outline);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.tours-sidebar__search {
+  width: 100%;
+  border-radius: 1rem;
+  padding: 0.95rem 1rem;
+  background: var(--surface-low);
+}
+
+.tours-sidebar__stack {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.checkbox-row,
+.radio-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--text);
+}
+
+.chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.filter-chip {
+  border: 1px solid rgba(116, 118, 135, 0.22);
+  border-radius: 0.8rem;
+  padding: 0.7rem 0.9rem;
+  color: var(--text-muted);
+}
+
+.filter-chip--active {
+  border-color: rgba(0, 73, 227, 0.28);
+  background: rgba(0, 73, 227, 0.08);
+  color: var(--primary);
+}
+
+.tours-sidebar__range {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.35rem;
+  color: var(--outline);
+  font-size: 0.78rem;
+}
+
+.tours-sidebar__promo {
+  position: relative;
+  min-height: 18rem;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+}
+
+.tours-sidebar__promo img,
+.tours-sidebar__promo-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.tours-sidebar__promo img {
+  object-fit: cover;
+}
+
+.tours-sidebar__promo-overlay {
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  padding: 1.4rem;
+  background: linear-gradient(180deg, rgba(12, 20, 36, 0.1), rgba(12, 20, 36, 0.88));
+  color: #fff;
+}
+
+.tours-sidebar__promo-overlay h3 {
+  margin: 0.8rem 0 0.5rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.5rem;
+}
+
+.tours-sidebar__promo-overlay p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.tours-results__header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1.25rem;
+  margin-bottom: 1.6rem;
+}
+
+.tours-results__title {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(2.2rem, 5vw, 3.2rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.tours-results__description {
+  margin: 0.5rem 0 0;
+  color: var(--outline);
+  font-style: italic;
+}
+
+.tours-results__sort {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: var(--outline);
+  font-weight: 700;
+}
+
+.tours-results__sort select {
+  border-radius: 0.9rem;
+  padding: 0.8rem 2.5rem 0.8rem 1rem;
+  background: var(--surface-lowest);
+  color: var(--primary);
+  box-shadow: var(--shadow-soft);
+}
+
+.tours-results__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  margin-top: 2rem;
+}
+
+.pagination button,
+.pagination__item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.7rem;
+  height: 2.7rem;
+  border: 1px solid rgba(116, 118, 135, 0.22);
+  border-radius: 0.7rem;
+  background: var(--surface-lowest);
+}
+
+.pagination__item--active {
+  border-color: transparent;
+  background: var(--primary);
+  color: #fff;
+}
+
+.pagination__dots {
+  color: var(--outline);
+}
+
+@media (max-width: 1199px) {
+  .tours-page__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .tours-sidebar {
+    position: static;
+  }
+}
+
+@media (max-width: 767px) {
+  .tours-results__header {
+    flex-direction: column;
+    align-items: start;
+  }
+
+  .tours-results__grid {
+    grid-template-columns: 1fr;
+  }
+}

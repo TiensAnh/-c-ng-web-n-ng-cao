@@ -1,18 +1,19 @@
+import usePageTitle from '../hooks/usePageTitle';
+import { homeContent } from '../services/siteContentService';
+import HomeHeroSection from '../components/sections/HomeHeroSection';
+import HomePromotionsSection from '../components/sections/HomePromotionsSection';
+import HomeNewsletterSection from '../components/sections/HomeNewsletterSection';
 
-import PopularTours from '../components/PopularTours'
-import Hero from '../components/Hero'
+function HomePage() {
+  usePageTitle('ADN Travel | Trang chủ');
 
-function HomePage(){
-  return(
+  return (
     <>
-      <div className="background-img">
-        <Hero/>
-      </div>
-      
-      <PopularTours/>
+      <HomeHeroSection hero={homeContent.hero} />
+      <HomePromotionsSection promotions={homeContent.promotions} />
+      <HomeNewsletterSection newsletter={homeContent.newsletter} />
     </>
-    
-  )
+  );
 }
-export default HomePage
 
+export default HomePage;

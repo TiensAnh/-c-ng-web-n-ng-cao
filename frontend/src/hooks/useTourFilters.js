@@ -1,0 +1,103 @@
+import { useDeferredValue, useState } from 'react';
+
+function useTourFilters(tours, initialSearch = '') {
+  const [searchText, setSearchText] = useState(initialSearch);
+  const [selectedDestinations, setSelectedDestinations] = useState([]);
+  const [priceRange, setPriceRange] = useState(20000000);
+  const [selectedDuration, setSelectedDuration] = useState('4-7 ngày');
+  const [selectedRating, setSelectedRating] = useState('all');
+  const [sortBy, setSortBy] = useState('popular');
+  const [hasCustomDestinationFilter, setHasCustomDestinationFilter] = useState(false);
+  const [hasCustomDurationFilter, setHasCustomDurationFilter] = useState(false);
+
+  const deferredSearchText = useDeferredValue(searchText);
+
+  const toggleDestination = (destination) => {
+    setHasCustomDestinationFilter(true);
+    setSelectedDestinations((current) =>
+      current.includes(destination)
+        ? current.filter((item) => item !== destination)
+        : [...current, destination],
+    );
+  };
+
+  const filteredTours = tours
+    .filter((tour) => {
+      if (!hasCustomDestinationFilter || !selectedDestinations.length) {
+        return true;
+      }
+
+      return selectedDestinations.includes(tour.destination);
+    })
+    .filter((tour) => tour.price <= priceRange)
+    .filter((tour) => {
+      if (!hasCustomDurationFilter || selectedDuration === 'all') {
+        return true;
+      }
+
+      return tour.durationGroup === selectedDuration;
+    })
+    .filter((tour) => {
+      if (selectedRating === 'all') {
+        return true;
+      }
+
+      if (selectedRating === '5') {
+        return tour.rating >= 5;
+      }
+
+      return tour.rating >= 4;
+    })
+    .filter((tour) => {
+      if (!deferredSearchText.trim()) {
+        return true;
+      }
+
+      const searchableText = [
+        tour.title,
+        tour.description,
+        tour.destination,
+        tour.transport,
+      ]
+        .join(' ')
+        .toLowerCase();
+
+      return searchableText.includes(deferredSearchText.trim().toLowerCase());
+    })
+    .sort((left, right) => {
+      if (sortBy === 'price-asc') {
+        return left.price - right.price;
+      }
+
+      if (sortBy === 'price-desc') {
+        return right.price - left.price;
+      }
+
+      if (sortBy === 'rating') {
+        return right.rating - left.rating;
+      }
+
+      return right.popularity - left.popularity;
+    });
+
+  return {
+    filteredTours,
+    priceRange,
+    searchText,
+    selectedDestinations,
+    selectedDuration,
+    selectedRating,
+    sortBy,
+    setPriceRange,
+    setSearchText,
+    setSelectedDuration: (value) => {
+      setHasCustomDurationFilter(true);
+      setSelectedDuration(value);
+    },
+    setSelectedRating,
+    setSortBy,
+    toggleDestination,
+  };
+}
+
+export default useTourFilters;
