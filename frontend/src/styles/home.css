@@ -21,7 +21,11 @@
 .home-hero__overlay {
   background: linear-gradient(90deg, rgba(9, 16, 28, 0.62) 0%, rgba(9, 16, 28, 0.2) 50%, rgba(9, 16, 28, 0.45) 100%);
 }
+<<<<<<< HEAD
 
+=======
+  
+>>>>>>> 8cf1a3989029571942876b8f0683261f93b85e40
 .home-hero__content {
   position: relative;
   z-index: 1;

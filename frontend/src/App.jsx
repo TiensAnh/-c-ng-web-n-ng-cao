@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { Route, Routes } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
 import HomePage from './pages/HomePage';
@@ -22,6 +23,12 @@ function App() {
       </Route>
     </Routes>
   );
+=======
+import AppRouter from './app/AppRouter';
+
+function App() {
+  return <AppRouter />;
+>>>>>>> 8cf1a3989029571942876b8f0683261f93b85e40
 }
 
 export default App;

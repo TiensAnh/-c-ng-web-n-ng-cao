@@ -17,11 +17,30 @@
 }
 
 .site-navbar__brand {
+<<<<<<< HEAD
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 1.6rem;
   font-style: italic;
   font-weight: 800;
   color: var(--primary);
+=======
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12.25rem;
+  height: 2.5rem;
+  overflow: hidden;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.site-navbar__brand-logo {
+  display: block;
+  width: auto;
+  height: 8.3rem;
+  max-width: none;
+  flex-shrink: 0;
+>>>>>>> 8cf1a3989029571942876b8f0683261f93b85e40
 }
 
 .site-navbar__links {
@@ -84,6 +103,15 @@
   }
 
   .site-navbar__brand {
+<<<<<<< HEAD
     font-size: 1.3rem;
+=======
+    width: 9.8rem;
+    height: 2rem;
+  }
+
+  .site-navbar__brand-logo {
+    height: 6.65rem;
+>>>>>>> 8cf1a3989029571942876b8f0683261f93b85e40
   }
 }
