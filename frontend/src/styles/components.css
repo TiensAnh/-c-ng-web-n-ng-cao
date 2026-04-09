@@ -1,0 +1,456 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: fit-content;
+  border-radius: 1rem;
+  padding: 0.9rem 1.5rem;
+  font-weight: 700;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+}
+
+.button--primary {
+  background: var(--gradient-primary);
+  color: #fff;
+  box-shadow: var(--shadow-soft);
+}
+
+.button--secondary {
+  background: var(--surface-high);
+  color: var(--primary);
+}
+
+.button--ghost {
+  color: #64748b;
+}
+
+.button--outline {
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.button--light {
+  background: var(--surface-lowest);
+  color: var(--primary);
+}
+
+.hero-search {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr auto;
+  gap: 0.5rem;
+  align-items: stretch;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 1.8rem;
+  background: rgba(255, 255, 255, 0.96);
+  padding: 0.55rem;
+  box-shadow: var(--shadow-deep);
+}
+
+.hero-search__field {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  border-radius: 1.35rem;
+  padding: 1rem 1rem 1rem 1.1rem;
+  background: var(--surface-lowest);
+}
+
+.hero-search__field--grow {
+  min-width: 0;
+}
+
+.hero-search__field > span {
+  color: var(--primary);
+}
+
+.hero-search__field label {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: #8792a3;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.hero-search__field input,
+.hero-search__field select,
+.hero-search__field strong {
+  display: block;
+  width: 100%;
+  background: transparent;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.hero-search__button {
+  min-width: 165px;
+  align-self: center;
+  border-radius: 1.2rem;
+}
+
+.promo-card,
+.tour-card,
+.feature-card,
+.contact-info-card,
+.team-member-card {
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+}
+
+.promo-card {
+  position: relative;
+  min-height: 25rem;
+  box-shadow: var(--shadow-soft);
+}
+
+.promo-card__image,
+.promo-card__overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.promo-card__image {
+  object-fit: cover;
+}
+
+.promo-card__overlay {
+  background: linear-gradient(180deg, rgba(8, 15, 30, 0.1) 18%, rgba(8, 15, 30, 0.88) 100%);
+}
+
+.promo-card__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  justify-content: end;
+  padding: 2rem;
+  color: #fff;
+}
+
+.promo-card__badge {
+  width: fit-content;
+  margin-bottom: 0.8rem;
+  border-radius: 999px;
+  background: var(--tertiary-soft);
+  color: #261a00;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.promo-card__title,
+.feature-card__title,
+.tour-card__title,
+.contact-info-card__title,
+.team-member-card__name {
+  margin: 0 0 0.6rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+}
+
+.promo-card__title {
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+}
+
+.promo-card__description {
+  max-width: 28rem;
+  margin: 0 0 1.4rem;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.feature-card {
+  min-height: 13rem;
+  padding: 1.8rem;
+  background: var(--surface-lowest);
+}
+
+.feature-card--blue {
+  background: #d6e3ff;
+}
+
+.feature-card--gold {
+  background: rgba(255, 223, 158, 0.18);
+}
+
+.feature-card--neutral {
+  background: var(--surface-high);
+}
+
+.feature-card__icon {
+  display: inline-flex;
+  margin-bottom: 1rem;
+  border-radius: 1rem;
+  padding: 0.8rem;
+  background: var(--surface-lowest);
+  color: var(--primary);
+}
+
+.feature-card__description,
+.contact-info-card__description,
+.team-member-card__description {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+.tour-card {
+  background: var(--surface-lowest);
+  box-shadow: var(--shadow-soft);
+}
+
+.tour-card__media {
+  position: relative;
+  height: 17rem;
+}
+
+.tour-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tour-card__rating,
+.tour-card__bookmark {
+  position: absolute;
+  top: 1rem;
+}
+
+.tour-card__rating {
+  left: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 0.45rem 0.8rem;
+  color: var(--primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.tour-card__rating .material-symbols-outlined {
+  font-variation-settings: 'FILL' 1;
+  font-size: 1rem;
+}
+
+.tour-card__bookmark {
+  right: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  width: 2.4rem;
+  height: 2.4rem;
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+  backdrop-filter: blur(10px);
+}
+
+.tour-card__content {
+  padding: 1.5rem;
+}
+
+.tour-card__heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.tour-card__badge {
+  flex-shrink: 0;
+  border-radius: 0.5rem;
+  background: rgba(255, 223, 158, 0.8);
+  color: #5b4300;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.tour-card__description {
+  margin: 0 0 1.25rem;
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
+.tour-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.3rem;
+  color: var(--outline);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.tour-card__meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.tour-card__footer {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1.15rem;
+  border-top: 1px solid rgba(195, 197, 216, 0.25);
+}
+
+.tour-card__price-label {
+  display: block;
+  color: var(--outline);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.tour-card__price {
+  color: var(--primary);
+  font-size: 1.45rem;
+  font-weight: 800;
+}
+
+.contact-info-card {
+  height: 100%;
+  padding: 2rem;
+  background: var(--surface-low);
+}
+
+.contact-info-card--wide {
+  min-height: 14rem;
+}
+
+.contact-info-card__icon {
+  display: inline-flex;
+  margin-bottom: 1rem;
+  border-radius: 1rem;
+  padding: 0.8rem;
+  background: rgba(0, 73, 227, 0.1);
+  color: var(--primary);
+}
+
+.faq-item {
+  border-radius: 1.3rem;
+  background: var(--surface-low);
+  padding: 1.2rem 1.3rem;
+}
+
+.faq-item__button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--text);
+  font-weight: 700;
+  text-align: left;
+}
+
+.faq-item__answer {
+  margin: 0.85rem 0 0;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.stat-card {
+  text-align: center;
+}
+
+.stat-card__value {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--primary);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(2.5rem, 6vw, 3.4rem);
+  font-weight: 800;
+}
+
+.stat-card__label {
+  color: #8792a3;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.team-member-card__media {
+  aspect-ratio: 3 / 4;
+  margin-bottom: 1.25rem;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+}
+
+.team-member-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.team-member-card__role {
+  margin: 0 0 0.45rem;
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.newsletter-form {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.newsletter-form input {
+  flex: 1;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1rem;
+  padding: 1rem 1.2rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+}
+
+.newsletter-form input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.newsletter-form--dark input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+@media (max-width: 1023px) {
+  .hero-search {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-search__button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 767px) {
+  .newsletter-form,
+  .tour-card__footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tour-card__heading {
+    flex-direction: column;
+  }
+}

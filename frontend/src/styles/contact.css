@@ -1,0 +1,166 @@
+.contact-hero__content {
+  max-width: 44rem;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.contact-hero__content h1 {
+  margin: 1rem 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(2.8rem, 7vw, 4.5rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.contact-hero__content p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.75;
+}
+
+.contact-details__grid {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: 1.5rem;
+}
+
+.contact-details__info,
+.contact-details__stack {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.contact-details__stack {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.contact-map-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 18rem;
+  border-radius: var(--radius-xl);
+}
+
+.contact-map-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.contact-map-card__button {
+  position: absolute;
+  left: 1.2rem;
+  bottom: 1.2rem;
+}
+
+.contact-form-card {
+  border-radius: var(--radius-xl);
+  background: var(--surface-lowest);
+  padding: 2rem;
+  box-shadow: var(--shadow-soft);
+}
+
+.contact-form {
+  display: grid;
+  gap: 1.2rem;
+}
+
+.contact-form label {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.contact-form label span {
+  font-weight: 700;
+}
+
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  border-radius: 1rem;
+  padding: 1rem 1.1rem;
+  background: var(--surface-low);
+}
+
+.contact-form__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.contact-form__actions {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.contact-form__note {
+  margin: 0;
+  color: var(--outline);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.contact-faq__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.contact-newsletter__panel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 2.5rem;
+  min-height: 22rem;
+}
+
+.contact-newsletter__panel img,
+.contact-newsletter__overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.contact-newsletter__panel img {
+  object-fit: cover;
+}
+
+.contact-newsletter__overlay {
+  background: rgba(24, 28, 35, 0.72);
+}
+
+.contact-newsletter__content {
+  position: relative;
+  z-index: 1;
+  max-width: 38rem;
+  padding: clamp(2rem, 4vw, 4rem);
+  color: #fff;
+}
+
+.contact-newsletter__content h2 {
+  margin: 0 0 1rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(2rem, 5vw, 3.3rem);
+  font-weight: 800;
+  line-height: 1.05;
+}
+
+.contact-newsletter__content > p {
+  margin: 0 0 1.5rem;
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.7;
+}
+
+@media (max-width: 1023px) {
+  .contact-details__grid,
+  .contact-faq__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 767px) {
+  .contact-details__stack,
+  .contact-form__grid {
+    grid-template-columns: 1fr;
+  }
+}
