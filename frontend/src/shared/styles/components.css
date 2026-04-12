@@ -1,0 +1,799 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: fit-content;
+  border-radius: 1rem;
+  padding: 0.9rem 1.5rem;
+  font-weight: 700;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
+  transform: none;
+  box-shadow: none;
+}
+
+.button--primary {
+  background: var(--gradient-primary);
+  color: #fff;
+  box-shadow: var(--shadow-soft);
+}
+
+.button--secondary {
+  background: var(--surface-high);
+  color: var(--primary);
+}
+
+.button--ghost {
+  color: #64748b;
+}
+
+.button--outline {
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.button--light {
+  background: var(--surface-lowest);
+  color: var(--primary);
+}
+
+.auth-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+}
+
+.auth-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 20, 40, 0.52);
+  backdrop-filter: blur(16px);
+}
+
+.auth-modal__dialog {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  width: min(960px, 100%);
+  max-height: min(720px, calc(100vh - 2.5rem));
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.36);
+  border-radius: 1.75rem;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 32px 72px rgba(9, 29, 63, 0.26);
+}
+
+.auth-modal__panel,
+.auth-modal__content {
+  min-width: 0;
+}
+
+.auth-modal__panel {
+  position: relative;
+  padding: 2.4rem 2rem;
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.2), transparent 42%),
+    linear-gradient(180deg, rgba(0, 56, 182, 0.2), transparent 48%),
+    var(--gradient-primary);
+  color: #fff;
+}
+
+.auth-modal__panel::after {
+  content: '';
+  position: absolute;
+  inset: auto -4rem -4rem auto;
+  width: 14rem;
+  height: 14rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  filter: blur(4px);
+}
+
+.auth-modal__eyebrow {
+  margin-bottom: 1.1rem;
+}
+
+.auth-modal__panel-title {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 0.9rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(2rem, 5vw, 2.8rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.auth-modal__panel-description {
+  position: relative;
+  z-index: 1;
+  max-width: 26rem;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.7;
+}
+
+.auth-modal__benefits {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.9rem;
+  margin-top: 2rem;
+}
+
+.auth-modal__benefit {
+  display: flex;
+  align-items: start;
+  gap: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1.2rem;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 1rem;
+  backdrop-filter: blur(12px);
+}
+
+.auth-modal__benefit-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  padding: 0.55rem;
+  font-size: 1.05rem;
+}
+
+.auth-modal__content {
+  position: relative;
+  overflow: auto;
+  background: linear-gradient(180deg, rgba(246, 249, 255, 0.96) 0%, #fff 34%);
+  padding: 1.5rem 2rem 2rem;
+}
+
+.auth-modal__close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 999px;
+  background: rgba(222, 227, 234, 0.72);
+  color: var(--secondary);
+  font-size: 1rem;
+  font-weight: 800;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.auth-modal__close:hover {
+  background: rgba(222, 227, 234, 1);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+.auth-modal__tabs {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem;
+  margin-bottom: 1.8rem;
+  border-radius: 999px;
+  background: var(--surface-high);
+  padding: 0.35rem;
+}
+
+.auth-modal__tab {
+  border-radius: 999px;
+  padding: 0.78rem 1.15rem;
+  color: #677489;
+  font-weight: 700;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.auth-modal__tab--active {
+  background: #fff;
+  color: var(--primary);
+  box-shadow: 0 10px 24px rgba(15, 41, 77, 0.08);
+}
+
+.auth-modal__body {
+  max-width: 30rem;
+}
+
+.auth-modal__title {
+  margin: 0.9rem 0 0.45rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(1.8rem, 4vw, 2.35rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.auth-modal__subtitle {
+  margin: 0 0 1.6rem;
+  color: var(--outline);
+  line-height: 1.65;
+}
+
+.auth-modal__form {
+  display: grid;
+  gap: 1rem;
+}
+
+.auth-modal__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.auth-modal__field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.auth-modal__field label {
+  color: var(--secondary);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+.auth-modal__input {
+  width: 100%;
+  border: 1px solid rgba(116, 118, 135, 0.18);
+  border-radius: 1rem;
+  background: #fff;
+  padding: 0.95rem 1rem;
+  color: var(--text);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.auth-modal__input:focus {
+  border-color: rgba(0, 73, 227, 0.35);
+  box-shadow: 0 0 0 0.28rem rgba(0, 73, 227, 0.08);
+}
+
+.auth-modal__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.auth-modal__checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--text-muted);
+  font-size: 0.94rem;
+}
+
+.auth-modal__checkbox input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--primary);
+}
+
+.auth-modal__link {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.auth-modal__actions {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 0.35rem;
+}
+
+.auth-modal__submit {
+  width: 100%;
+  justify-content: center;
+  border-radius: 1.1rem;
+  padding-block: 1rem;
+}
+
+.auth-modal__switch {
+  margin: 0;
+  color: var(--outline);
+  text-align: center;
+}
+
+.auth-modal__feedback {
+  margin: 0;
+  border-radius: 1rem;
+  padding: 0.9rem 1rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.auth-modal__feedback--success {
+  background: rgba(11, 122, 52, 0.08);
+  color: #0b7a34;
+}
+
+.auth-modal__feedback--error {
+  background: rgba(186, 26, 26, 0.08);
+  color: #ba1a1a;
+}
+
+.hero-search {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr auto;
+  gap: 0.5rem;
+  align-items: stretch;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 1.8rem;
+  background: rgba(255, 255, 255, 0.96);
+  padding: 0.55rem;
+  box-shadow: var(--shadow-deep);
+}
+
+.hero-search__field {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  border-radius: 1.35rem;
+  padding: 1rem 1rem 1rem 1.1rem;
+  background: var(--surface-lowest);
+}
+
+.hero-search__field--grow {
+  min-width: 0;
+}
+
+.hero-search__field > span {
+  color: var(--primary);
+}
+
+.hero-search__field label {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: #8792a3;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.hero-search__field input,
+.hero-search__field select,
+.hero-search__field strong {
+  display: block;
+  width: 100%;
+  background: transparent;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.hero-search__button {
+  min-width: 165px;
+  align-self: center;
+  border-radius: 1.2rem;
+}
+
+.promo-card,
+.tour-card,
+.feature-card,
+.contact-info-card,
+.team-member-card {
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+}
+
+.promo-card {
+  position: relative;
+  min-height: 25rem;
+  box-shadow: var(--shadow-soft);
+}
+
+.promo-card__image,
+.promo-card__overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.promo-card__image {
+  object-fit: cover;
+}
+
+.promo-card__overlay {
+  background: linear-gradient(180deg, rgba(8, 15, 30, 0.1) 18%, rgba(8, 15, 30, 0.88) 100%);
+}
+
+.promo-card__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  justify-content: end;
+  padding: 2rem;
+  color: #fff;
+}
+
+.promo-card__badge {
+  width: fit-content;
+  margin-bottom: 0.8rem;
+  border-radius: 999px;
+  background: var(--tertiary-soft);
+  color: #261a00;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.promo-card__title,
+.feature-card__title,
+.tour-card__title,
+.contact-info-card__title,
+.team-member-card__name {
+  margin: 0 0 0.6rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+}
+
+.promo-card__title {
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+}
+
+.promo-card__description {
+  max-width: 28rem;
+  margin: 0 0 1.4rem;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.feature-card {
+  min-height: 13rem;
+  padding: 1.8rem;
+  background: var(--surface-lowest);
+}
+
+.feature-card--blue {
+  background: #d6e3ff;
+}
+
+.feature-card--gold {
+  background: rgba(255, 223, 158, 0.18);
+}
+
+.feature-card--neutral {
+  background: var(--surface-high);
+}
+
+.feature-card__icon {
+  display: inline-flex;
+  margin-bottom: 1rem;
+  border-radius: 1rem;
+  padding: 0.8rem;
+  background: var(--surface-lowest);
+  color: var(--primary);
+}
+
+.feature-card__description,
+.contact-info-card__description,
+.team-member-card__description {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+.tour-card {
+  background: var(--surface-lowest);
+  box-shadow: var(--shadow-soft);
+}
+
+.tour-card__media {
+  position: relative;
+  height: 17rem;
+}
+
+.tour-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tour-card__rating,
+.tour-card__bookmark {
+  position: absolute;
+  top: 1rem;
+}
+
+.tour-card__rating {
+  left: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 0.45rem 0.8rem;
+  color: var(--primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.tour-card__rating .material-symbols-outlined {
+  font-variation-settings: 'FILL' 1;
+  font-size: 1rem;
+}
+
+.tour-card__bookmark {
+  right: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  width: 2.4rem;
+  height: 2.4rem;
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+  backdrop-filter: blur(10px);
+}
+
+.tour-card__content {
+  padding: 1.5rem;
+}
+
+.tour-card__heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.tour-card__badge {
+  flex-shrink: 0;
+  border-radius: 0.5rem;
+  background: rgba(255, 223, 158, 0.8);
+  color: #5b4300;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.tour-card__description {
+  margin: 0 0 1.25rem;
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
+.tour-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.3rem;
+  color: var(--outline);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.tour-card__meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.tour-card__footer {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1.15rem;
+  border-top: 1px solid rgba(195, 197, 216, 0.25);
+}
+
+.tour-card__price-label {
+  display: block;
+  color: var(--outline);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.tour-card__price {
+  color: var(--primary);
+  font-size: 1.45rem;
+  font-weight: 800;
+}
+
+.contact-info-card {
+  height: 100%;
+  padding: 2rem;
+  background: var(--surface-low);
+}
+
+.contact-info-card--wide {
+  min-height: 14rem;
+}
+
+.contact-info-card__icon {
+  display: inline-flex;
+  margin-bottom: 1rem;
+  border-radius: 1rem;
+  padding: 0.8rem;
+  background: rgba(0, 73, 227, 0.1);
+  color: var(--primary);
+}
+
+.faq-item {
+  border-radius: 1.3rem;
+  background: var(--surface-low);
+  padding: 1.2rem 1.3rem;
+}
+
+.faq-item__button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--text);
+  font-weight: 700;
+  text-align: left;
+}
+
+.faq-item__answer {
+  margin: 0.85rem 0 0;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.stat-card {
+  text-align: center;
+}
+
+.stat-card__value {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--primary);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(2.5rem, 6vw, 3.4rem);
+  font-weight: 800;
+}
+
+.stat-card__label {
+  color: #8792a3;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.team-member-card__media {
+  aspect-ratio: 3 / 4;
+  margin-bottom: 1.25rem;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+}
+
+.team-member-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.team-member-card__role {
+  margin: 0 0 0.45rem;
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.newsletter-form {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.newsletter-form input {
+  flex: 1;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1rem;
+  padding: 1rem 1.2rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+}
+
+.newsletter-form input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.newsletter-form--dark input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+@media (max-width: 1023px) {
+  .hero-search {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-search__button {
+    width: 100%;
+  }
+
+  .auth-modal__dialog {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-modal__panel {
+    padding-bottom: 1.75rem;
+  }
+
+  .auth-modal__benefits {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .newsletter-form,
+  .tour-card__footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tour-card__heading {
+    flex-direction: column;
+  }
+
+  .auth-modal {
+    padding: 0.8rem;
+  }
+
+  .auth-modal__dialog {
+    max-height: calc(100vh - 1rem);
+    border-radius: 1.4rem;
+  }
+
+  .auth-modal__panel,
+  .auth-modal__content {
+    padding-inline: 1.25rem;
+  }
+
+  .auth-modal__panel {
+    padding-top: 1.5rem;
+    padding-bottom: 1.35rem;
+  }
+
+  .auth-modal__benefits,
+  .auth-modal__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-modal__tabs {
+    width: 100%;
+  }
+
+  .auth-modal__tab {
+    text-align: center;
+  }
+}

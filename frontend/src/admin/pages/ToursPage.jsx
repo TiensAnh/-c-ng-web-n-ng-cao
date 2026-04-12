@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { images } from "../assets";
+import AdminActionModal from "../components/AdminActionModal";
 import Button from "../components/Button";
 import DataTable from "../components/DataTable";
 import HeroSection from "../components/HeroSection";
@@ -12,18 +14,45 @@ import useDocumentTitle from "../hooks/useDocumentTitle";
 import useSearchFilter from "../hooks/useSearchFilter";
 import { toursPage } from "../services/adminService";
 
+const TOUR_IMAGES = [images.tourHaLong, images.tourDaLat, images.tourNhaTrang, images.tourSapa];
+
+function formatCount(value) {
+  return new Intl.NumberFormat("en-US").format(value);
+}
+
+function formatVndPrice(value) {
+  const amount = Number(value);
+
+  if (!Number.isFinite(amount)) {
+    return value;
+  }
+
+  return `${new Intl.NumberFormat("vi-VN").format(amount)}d`;
+}
+
+function createTourId(rows) {
+  const largestId = rows.reduce((currentLargest, tour) => {
+    const numericId = Number(tour.id.replace(/\D/g, ""));
+    return Number.isFinite(numericId) ? Math.max(currentLargest, numericId) : currentLargest;
+  }, 0);
+
+  return `TR-${String(largestId + 1).padStart(4, "0")}`;
+}
+
 export default function ToursPage() {
+  const [tourRows, setTourRows] = useState(toursPage.rows);
   const [selectedLocation, setSelectedLocation] = useState("All locations");
   const [selectedStatus, setSelectedStatus] = useState("All statuses");
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const { query, setQuery, filteredItems } = useSearchFilter(
-    toursPage.rows,
+    tourRows,
     (tour) => `${tour.name} ${tour.id} ${tour.location} ${tour.status}`,
   );
 
   useDocumentTitle("Tours | The Horizon Admin");
 
-  const locationOptions = ["All locations", ...new Set(toursPage.rows.map((tour) => tour.location))];
-  const statusOptions = ["All statuses", ...new Set(toursPage.rows.map((tour) => tour.status))];
+  const locationOptions = ["All locations", ...new Set(tourRows.map((tour) => tour.location))];
+  const statusOptions = ["All statuses", ...new Set(tourRows.map((tour) => tour.status))];
 
   const visibleTours = filteredItems.filter((tour) => {
     const matchesLocation = selectedLocation === "All locations" || tour.location === selectedLocation;
@@ -31,13 +60,43 @@ export default function ToursPage() {
     return matchesLocation && matchesStatus;
   });
 
+  const tourSummaryCards = toursPage.summaryCards.map((card) => {
+    if (card.id === "total") {
+      return { ...card, value: formatCount(tourRows.length) };
+    }
+
+    if (card.id === "active") {
+      return {
+        ...card,
+        value: formatCount(tourRows.filter((tour) => tour.status === "Active").length),
+      };
+    }
+
+    return card;
+  });
+
+  const handleAddTour = (values) => {
+    setTourRows((currentRows) => [
+      {
+        id: createTourId(currentRows),
+        name: values.name.trim(),
+        image: TOUR_IMAGES[currentRows.length % TOUR_IMAGES.length],
+        location: values.location.trim(),
+        duration: values.duration.trim(),
+        price: formatVndPrice(values.price),
+        status: values.status,
+      },
+      ...currentRows,
+    ]);
+  };
+
   return (
     <div className="admin-page-shell">
       <HeroSection
         title={toursPage.title}
         description={toursPage.description}
         actions={
-          <Button icon="add" iconClassName="text-lg" size="lg">
+          <Button icon="add" iconClassName="text-lg" size="lg" onClick={() => setIsCreateModalOpen(true)}>
             Them Tour moi
           </Button>
         }
@@ -89,7 +148,9 @@ export default function ToursPage() {
         contentClassName="p-0"
         footer={
           <div className="flex items-center justify-between bg-surface-container-low px-8 py-6">
-            <p className="text-xs font-medium text-slate-500">Showing 1 to {visibleTours.length} of 24 results</p>
+            <p className="text-xs font-medium text-slate-500">
+              Showing 1 to {visibleTours.length} of {tourRows.length} results
+            </p>
             <div className="flex gap-2">
               <IconButton icon="chevron_left" variant="subtle" className="border border-primary/10 bg-surface-container-lowest text-slate-400" />
               <Button variant="solid" className="h-10 w-10 rounded-lg px-0 shadow-none">
@@ -158,7 +219,7 @@ export default function ToursPage() {
       </SectionCard>
 
       <section className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-4">
-        {toursPage.summaryCards.map((card) => (
+        {tourSummaryCards.map((card) => (
           <StatCard
             key={card.id}
             className={`${card.className} flex h-40 flex-col justify-between p-6`}
@@ -176,6 +237,80 @@ export default function ToursPage() {
           <Icon name="auto_awesome" className="absolute -bottom-4 -right-4 rotate-12 text-[96px] text-white/10" />
         </article>
       </section>
+
+      <AdminActionModal
+        isOpen={isCreateModalOpen}
+        title="Them tour moi"
+        description="Mo popup tao tour nhanh de bo sung san pham moi ma khong can roi khoi trang quan tri."
+        eyebrow="Tours workspace"
+        icon="travel_explore"
+        note="Tour moi se duoc them ngay vao dau bang de ban co the tiep tuc sua, loc va kiem tra."
+        submitLabel="Tao tour"
+        onClose={() => setIsCreateModalOpen(false)}
+        onSubmit={handleAddTour}
+        initialValues={{ status: "Active" }}
+        features={[
+          {
+            icon: "inventory_2",
+            title: "Tao nhanh danh muc tour",
+            description: "Nhap thong tin cot loi de co ngay mot dong du lieu moi trong bang quan ly.",
+          },
+          {
+            icon: "bolt",
+            title: "Cap nhat tuc thi",
+            description: "So lieu tong tour va so tour dang hoat dong se thay doi ngay sau khi luu.",
+          },
+          {
+            icon: "tune",
+            title: "San sang cho bo loc",
+            description: "Dia diem va trang thai moi se tu dong xuat hien trong danh sach loc.",
+          },
+        ]}
+        fields={[
+          {
+            name: "name",
+            label: "Ten tour",
+            placeholder: "Vi du: Phu Quoc Sunset Retreat",
+            required: true,
+          },
+          {
+            name: "location",
+            label: "Dia diem",
+            placeholder: "Vi du: Kien Giang, VN",
+            required: true,
+          },
+          {
+            name: "duration",
+            label: "Thoi luong",
+            placeholder: "Vi du: 3 Days, 2 Nights",
+            required: true,
+          },
+          {
+            name: "price",
+            label: "Gia ban",
+            type: "number",
+            min: "0",
+            step: "100000",
+            placeholder: "4500000",
+            hint: "Nhap so nguyen, he thong se tu dong dinh dang theo VND.",
+            required: true,
+          },
+          {
+            name: "status",
+            label: "Trang thai",
+            type: "select",
+            options: ["Active", "Draft"],
+            required: true,
+          },
+          {
+            name: "notes",
+            label: "Ghi chu noi bo",
+            type: "textarea",
+            placeholder: "Mo ta ngan cho team van hanh, uu tien hoac nhac viec...",
+            span: 2,
+          },
+        ]}
+      />
     </div>
   );
 }

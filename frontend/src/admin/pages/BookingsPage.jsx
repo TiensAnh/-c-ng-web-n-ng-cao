@@ -1,4 +1,5 @@
 import { useState } from "react";
+import AdminActionModal from "../components/AdminActionModal";
 import Avatar from "../components/Avatar";
 import Button from "../components/Button";
 import DataTable from "../components/DataTable";
@@ -12,20 +13,120 @@ import StatusBadge from "../components/StatusBadge";
 import useDocumentTitle from "../hooks/useDocumentTitle";
 import useSearchFilter from "../hooks/useSearchFilter";
 import { bookingsPage } from "../services/adminService";
+import { getInitials } from "../utils/formatters";
+
+const BOOKING_STATUS_TONES = {
+  Cancelled: "blocked",
+  Confirmed: "success",
+  Pending: "pending",
+};
+
+function formatCount(value) {
+  return new Intl.NumberFormat("en-US").format(value);
+}
+
+function formatUsd(value) {
+  const amount = Number(value);
+
+  if (!Number.isFinite(amount)) {
+    return value;
+  }
+
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+  }).format(amount);
+}
+
+function parseUsd(value) {
+  const amount = Number(String(value).replace(/[^0-9.]/g, ""));
+  return Number.isFinite(amount) ? amount : 0;
+}
+
+function createBookingId(rows) {
+  const largestId = rows.reduce((currentLargest, booking) => {
+    const numericId = Number(booking.id.replace(/\D/g, ""));
+    return Number.isFinite(numericId) ? Math.max(currentLargest, numericId) : currentLargest;
+  }, 0);
+
+  return `#HZ-${largestId + 1}`;
+}
+
+function formatTravelDate(value) {
+  if (!value) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  }).format(new Date(`${value}T00:00:00`));
+}
 
 export default function BookingsPage() {
+  const [bookingRows, setBookingRows] = useState(bookingsPage.rows);
   const [selectedStatus, setSelectedStatus] = useState("All statuses");
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const { query, setQuery, filteredItems } = useSearchFilter(
-    bookingsPage.rows,
+    bookingRows,
     (booking) => `${booking.id} ${booking.customer} ${booking.email} ${booking.tour} ${booking.status}`,
   );
 
   useDocumentTitle(bookingsPage.title);
 
-  const statusOptions = ["All statuses", ...new Set(bookingsPage.rows.map((booking) => booking.status))];
+  const statusOptions = ["All statuses", ...new Set(bookingRows.map((booking) => booking.status))];
   const visibleBookings = filteredItems.filter(
     (booking) => selectedStatus === "All statuses" || booking.status === selectedStatus,
   );
+  const bookingStats = bookingsPage.stats.map((stat) => {
+    if (stat.id === "total") {
+      return { ...stat, value: formatCount(bookingRows.length) };
+    }
+
+    if (stat.id === "pending") {
+      return {
+        ...stat,
+        value: formatCount(bookingRows.filter((booking) => booking.status === "Pending").length),
+      };
+    }
+
+    if (stat.id === "confirmed") {
+      return {
+        ...stat,
+        value: formatCount(bookingRows.filter((booking) => booking.status === "Confirmed").length),
+      };
+    }
+
+    if (stat.id === "revenue") {
+      return {
+        ...stat,
+        value: formatUsd(bookingRows.reduce((sum, booking) => sum + parseUsd(booking.total), 0)),
+      };
+    }
+
+    return stat;
+  });
+
+  const handleAddBooking = (values) => {
+    setBookingRows((currentRows) => [
+      {
+        id: createBookingId(currentRows),
+        customer: values.customer.trim(),
+        email: values.email.trim(),
+        initials: getInitials(values.customer),
+        initialsClassName: "bg-primary-fixed text-on-primary-fixed-variant",
+        tour: values.tour.trim(),
+        subtitle: values.subtitle.trim() || "Manual reservation",
+        travelDate: formatTravelDate(values.travelDate),
+        total: formatUsd(values.total),
+        status: values.status,
+        statusTone: BOOKING_STATUS_TONES[values.status] ?? "pending",
+      },
+      ...currentRows,
+    ]);
+  };
 
   return (
     <div className="admin-page-shell">
@@ -35,13 +136,15 @@ export default function BookingsPage() {
         actions={
           <>
             <Button variant="secondary">Export Report</Button>
-            <Button icon="add">New Reservation</Button>
+            <Button icon="add" onClick={() => setIsCreateModalOpen(true)}>
+              New Reservation
+            </Button>
           </>
         }
       />
 
       <section className="mb-10 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-        {bookingsPage.stats.map((stat) => (
+        {bookingStats.map((stat) => (
           <StatCard
             key={stat.id}
             className={stat.id === "pending" ? "border-l-4 border-tertiary-fixed" : stat.id === "confirmed" ? "border-l-4 border-green-500" : ""}
@@ -92,7 +195,7 @@ export default function BookingsPage() {
         footer={
           <div className="flex items-center justify-between bg-surface-container-low px-6 py-4">
             <p className="text-xs font-medium text-slate-500">
-              Showing 1 to {visibleBookings.length} of 1,284 entries
+              Showing 1 to {visibleBookings.length} of {bookingRows.length} entries
             </p>
             <div className="flex gap-1">
               <IconButton icon="chevron_left" variant="subtle" className="h-8 w-8 rounded-lg p-0 text-slate-400" />
@@ -200,6 +303,88 @@ export default function BookingsPage() {
           </Button>
         </article>
       </section>
+
+      <AdminActionModal
+        isOpen={isCreateModalOpen}
+        title="Tao reservation moi"
+        description="Popup nay cho phep bo sung dat cho thu cong ngay trong khu vuc quan ly booking."
+        eyebrow="Bookings desk"
+        icon="calendar_add_on"
+        note="Reservation moi se xuat hien ngay dau bang, dong thoi cap nhat tong booking, pending, confirmed va doanh thu."
+        submitLabel="Tao reservation"
+        onClose={() => setIsCreateModalOpen(false)}
+        onSubmit={handleAddBooking}
+        initialValues={{ status: "Pending" }}
+        features={[
+          {
+            icon: "group_add",
+            title: "Nhan thong tin khach nhanh",
+            description: "Them khach, email va tour dang quan tam chi trong mot popup gon.",
+          },
+          {
+            icon: "credit_score",
+            title: "Tinh tong tien tu dong",
+            description: "Gia tri nhap vao se duoc dinh dang thanh USD de phu hop bang booking hien tai.",
+          },
+          {
+            icon: "insights",
+            title: "Thong ke tu dong doi",
+            description: "The pending, confirmed va revenue se phan anh ngay du lieu moi vua tao.",
+          },
+        ]}
+        fields={[
+          {
+            name: "customer",
+            label: "Customer name",
+            placeholder: "Vi du: Nguyen Lan Anh",
+            required: true,
+          },
+          {
+            name: "email",
+            label: "Email",
+            type: "email",
+            autoComplete: "email",
+            placeholder: "guest@example.com",
+            required: true,
+          },
+          {
+            name: "tour",
+            label: "Tour expedition",
+            placeholder: "Vi du: Da Nang Beach Escape",
+            required: true,
+          },
+          {
+            name: "travelDate",
+            label: "Travel date",
+            type: "date",
+            required: true,
+          },
+          {
+            name: "total",
+            label: "Total price",
+            type: "number",
+            min: "0",
+            step: "50",
+            placeholder: "1240",
+            hint: "Nhap so tien goc, he thong se tu chuyen sang dinh dang USD.",
+            required: true,
+          },
+          {
+            name: "status",
+            label: "Status",
+            type: "select",
+            options: ["Pending", "Confirmed", "Cancelled"],
+            required: true,
+          },
+          {
+            name: "subtitle",
+            label: "Reservation note",
+            type: "textarea",
+            placeholder: "Ghi chu ngan ve goi dich vu, uu dai, ghi chu noi bo...",
+            span: 2,
+          },
+        ]}
+      />
     </div>
   );
 }

@@ -1,4 +1,7 @@
+import { useState } from "react";
 import { useOutletContext } from "react-router-dom";
+import AdminActionModal from "../components/AdminActionModal";
+import Avatar from "../components/Avatar";
 import Button from "../components/Button";
 import DataTable from "../components/DataTable";
 import HeroSection from "../components/HeroSection";
@@ -9,20 +12,65 @@ import StatCard from "../components/StatCard";
 import StatusBadge from "../components/StatusBadge";
 import useDocumentTitle from "../hooks/useDocumentTitle";
 import { usersPage } from "../services/adminService";
-import { normalizeText } from "../utils/formatters";
+import { getInitials, normalizeText } from "../utils/formatters";
+
+const USER_ROLE_TONES = {
+  Admin: "admin",
+  User: "user",
+};
+
+const USER_STATUS_TONES = {
+  Active: "success",
+  Blocked: "blocked",
+  Inactive: "inactive",
+};
+
+function formatCount(value) {
+  return new Intl.NumberFormat("en-US").format(value);
+}
 
 export default function UsersPage() {
   const { topbarSearch } = useOutletContext();
+  const [userRows, setUserRows] = useState(usersPage.rows);
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
 
   useDocumentTitle(usersPage.title);
 
   const visibleUsers = topbarSearch.trim()
-    ? usersPage.rows.filter((user) =>
+    ? userRows.filter((user) =>
         normalizeText(`${user.name} ${user.email} ${user.role} ${user.status}`).includes(
           normalizeText(topbarSearch),
         ),
       )
-    : usersPage.rows;
+    : userRows;
+
+  const totalUsers = userRows.length;
+  const activeUsers = userRows.filter((user) => user.status === "Active").length;
+  const inactiveUsers = userRows.filter((user) => user.status === "Inactive").length;
+  const blockedUsers = userRows.filter((user) => user.status === "Blocked").length;
+
+  const handleInviteUser = (values) => {
+    setUserRows((currentRows) => [
+      {
+        id: normalizeText(values.email).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
+        name: values.name.trim(),
+        email: values.email.trim(),
+        avatar: "",
+        initials: getInitials(values.name),
+        role: values.role,
+        roleTone: USER_ROLE_TONES[values.role] ?? "user",
+        status: values.status,
+        statusTone: USER_STATUS_TONES[values.status] ?? "inactive",
+        registeredAt: new Intl.DateTimeFormat("en-US", {
+          month: "short",
+          day: "2-digit",
+          year: "numeric",
+        }).format(new Date()),
+        actionLabel: values.status === "Blocked" ? "Unblock" : "Block",
+      },
+      ...currentRows,
+    ]);
+  };
 
   return (
     <div className="admin-page-shell">
@@ -34,22 +82,24 @@ export default function UsersPage() {
             <Button variant="secondary" icon="file_download">
               Export List
             </Button>
-            <Button icon="person_add">Invite User</Button>
+            <Button icon="person_add" onClick={() => setIsInviteModalOpen(true)}>
+              Invite User
+            </Button>
           </>
         }
       />
 
       <section className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-4">
-        <StatCard className="border-l-4 border-primary" label="Total Users" value="12,842">
+        <StatCard className="border-l-4 border-primary" label="Total Users" value={formatCount(totalUsers)}>
           <div className="mt-2 flex items-center gap-1 text-xs font-medium text-green-600">
             <Icon name="trending_up" className="text-sm" />
-            8% vs last month
+            Live count in admin view
           </div>
         </StatCard>
 
         <article className="surface-card p-6">
           <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Active Now</p>
-          <h3 className="mt-1 font-headline text-2xl font-extrabold text-on-surface">1,402</h3>
+          <h3 className="mt-1 font-headline text-2xl font-extrabold text-on-surface">{formatCount(activeUsers)}</h3>
           <div className="mt-3 flex -space-x-2">
             {usersPage.stats[1].avatars.map((avatar, index) => (
               <img
@@ -60,16 +110,16 @@ export default function UsersPage() {
               />
             ))}
             <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-slate-100 text-[10px] font-bold text-slate-500">
-              +1.4k
+              +{Math.max(activeUsers, 0)}
             </span>
           </div>
         </article>
 
-        <StatCard className="border-l-4 border-tertiary" label="Pending Verifications" value="42">
-          <p className="mt-2 text-xs font-medium text-amber-600">Needs attention</p>
+        <StatCard className="border-l-4 border-tertiary" label="Pending Verifications" value={formatCount(inactiveUsers)}>
+          <p className="mt-2 text-xs font-medium text-amber-600">Inactive or waiting accounts</p>
         </StatCard>
 
-        <StatCard className="border-l-4 border-error" label="Blocked Accounts" value="12">
+        <StatCard className="border-l-4 border-error" label="Blocked Accounts" value={formatCount(blockedUsers)}>
           <p className="mt-2 text-xs font-medium text-slate-400">Compliance flagged</p>
         </StatCard>
       </section>
@@ -88,7 +138,7 @@ export default function UsersPage() {
           <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50 px-6 py-4">
             <span className="text-xs font-medium text-slate-500">
               Showing <span className="text-on-surface">{visibleUsers.length}</span> of{" "}
-              <span className="text-on-surface">12,842</span> users
+              <span className="text-on-surface">{totalUsers}</span> users
             </span>
             <div className="flex items-center gap-1">
               <IconButton icon="chevron_left" variant="subtle" className="border border-transparent p-1.5 text-slate-400 hover:border-slate-200" />
@@ -125,7 +175,13 @@ export default function UsersPage() {
             <tr key={user.id} className="group transition-colors hover:bg-surface-container-low">
               <td className="px-6 py-4">
                 <div className="flex items-center gap-4">
-                  <img src={user.avatar} alt={user.name} className="h-10 w-10 rounded-full object-cover shadow-sm" />
+                  <Avatar
+                    src={user.avatar}
+                    alt={user.name}
+                    initials={user.initials}
+                    className="h-10 w-10 rounded-full object-cover shadow-sm"
+                    fallbackClassName="shadow-sm"
+                  />
                   <div>
                     <p className="text-sm font-semibold text-on-surface">{user.name}</p>
                     <p className="text-xs text-slate-500">{user.email}</p>
@@ -187,6 +243,74 @@ export default function UsersPage() {
           </Button>
         </article>
       </section>
+
+      <AdminActionModal
+        isOpen={isInviteModalOpen}
+        title="Invite user moi"
+        description="Mo popup cap nhat nhanh tai khoan moi cho khu vuc admin ma khong can dieu huong sang trang khac."
+        eyebrow="Users workspace"
+        icon="person_add"
+        note="User moi se duoc chen len dau danh sach, dong thoi cap nhat tong so, active, inactive va blocked."
+        submitLabel="Them nguoi dung"
+        onClose={() => setIsInviteModalOpen(false)}
+        onSubmit={handleInviteUser}
+        initialValues={{ role: "User", status: "Active" }}
+        features={[
+          {
+            icon: "badge",
+            title: "Gan role ngay trong popup",
+            description: "Chon quyen Admin hoac User ngay luc tao tai khoan.",
+          },
+          {
+            icon: "verified_user",
+            title: "Quan ly trang thai",
+            description: "Tai khoan moi co the dat Active, Inactive hoac Blocked theo quy trinh van hanh.",
+          },
+          {
+            icon: "table_view",
+            title: "Dong bo voi bang hien tai",
+            description: "Danh sach va thong ke tren trang Users se thay doi ngay sau khi bam luu.",
+          },
+        ]}
+        fields={[
+          {
+            name: "name",
+            label: "Full name",
+            placeholder: "Vi du: Tran Minh Chau",
+            autoComplete: "name",
+            required: true,
+          },
+          {
+            name: "email",
+            label: "Email",
+            type: "email",
+            autoComplete: "email",
+            placeholder: "member@example.com",
+            required: true,
+          },
+          {
+            name: "role",
+            label: "Role",
+            type: "select",
+            options: ["User", "Admin"],
+            required: true,
+          },
+          {
+            name: "status",
+            label: "Status",
+            type: "select",
+            options: ["Active", "Inactive", "Blocked"],
+            required: true,
+          },
+          {
+            name: "notes",
+            label: "Internal note",
+            type: "textarea",
+            placeholder: "Nhan xet ngan cho team admin, phong ban hoac muc dich cap quyen...",
+            span: 2,
+          },
+        ]}
+      />
     </div>
   );
 }

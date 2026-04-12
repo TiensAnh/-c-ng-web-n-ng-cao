@@ -1,10 +1,10 @@
 import { Suspense, lazy } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import PublicLayout from '../layouts/public/PublicLayout';
-import HomePage from '../pages/public/HomePage';
-import ToursPage from '../pages/public/ToursPage';
-import AboutPage from '../pages/public/AboutPage';
-import ContactPage from '../pages/public/ContactPage';
+import PublicLayout from '../public/layouts/PublicLayout';
+import HomePage from '../public/pages/HomePage';
+import ToursPage from '../public/pages/ToursPage';
+import AboutPage from '../public/pages/AboutPage';
+import ContactPage from '../public/pages/ContactPage';
 const AdminApp = lazy(() => import('../admin/AdminApp'));
 const DashboardPage = lazy(() => import('../admin/pages/DashboardPage'));
 const ToursAdminPage = lazy(() => import('../admin/pages/ToursPage'));
