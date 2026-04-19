@@ -176,6 +176,340 @@ export const toursContent = {
   ],
 };
 
+const tourDetailContentById = {
+  1: {
+    eyebrow: 'Heritage voyage',
+    season: 'Thang 9 - thang 4',
+    groupSize: 'Toi da 24 khach',
+    departureNote: 'Thu 5 va Thu 7',
+    departureSchedule: 'Khoi hanh tu Ha Noi luc 07:30',
+    meetingPoint: 'Khu pho co Ha Noi hoac ben Tau Tuan Chau',
+    longDescription:
+      'Mot hanh trinh cham tren mat nuoc di san, noi thoi gian duoc can lai de ban nghe duoc ca tieng nuoc, gio va nhip sinh hoat tren boong tau 5 sao.',
+    curatorNote:
+      'Tour nay hop voi nhom khach muon co mot ky nghi ngan nhung van du do sau. Khung canh dep nhat den vao luc som va luc chieu muon, khi mat nuoc chang con on ao.',
+    curatorName: 'Linh Nguyen, ADN Curator',
+    overviewCards: [
+      {
+        icon: 'bed',
+        title: 'Du thuyen 5 sao tren vinh',
+        description:
+          'Khoang nghi rieng, cua so rong va boong tau mo de ban that su song trong canh quan thay vi chi di qua.',
+      },
+      {
+        icon: 'kayaking',
+        title: 'Hoat dong can bang',
+        description:
+          'Cheo kayak, tham quan hang, thu lop nau an va khoang nghi tu do de chuyen di khong bi gap rut.',
+      },
+      {
+        icon: 'restaurant',
+        title: 'Am thuc tren boong',
+        description:
+          'Menu theo mua voi hai san dia phuong, bua toi set-menu va bua sang nhe truoc khi tro lai ben.',
+      },
+    ],
+    highlights: [
+      {
+        icon: 'water',
+        title: 'Lan Ha trong goc nhin yen hon',
+        description: 'Tuyen duoc sap xep de ban co nhieu khoang lang va diem dung co chon loc hon so voi tour dai tra.',
+      },
+      {
+        icon: 'photo_camera',
+        title: 'Khoang anh binh minh va hoang hon',
+        description: 'Boong tau tren cung va lich trinh doi nhip theo anh sang giup ban co frame dep ma khong can voi vang.',
+      },
+      {
+        icon: 'spa',
+        title: 'Nghi it nhung dung chat',
+        description: 'Moi hoat dong duoc chia nhiet do hop ly de hanh trinh 2 ngay 1 dem van co cam giac day dan.',
+      },
+    ],
+    itinerary: [
+      {
+        label: 'Ngay 1',
+        title: 'Ha Noi - ben tau - check-in du thuyen',
+        description:
+          'Don khach tu sang, len tau vao buoi trua, nhan phong, dung bua trua tren hanh trinh va bat dau chuoi trai nghiem kayak, tham hang va sunset canape.',
+      },
+      {
+        label: 'Ngay 2',
+        title: 'Thai cuc buoi sang - brunch - tro ve',
+        description:
+          'Khoi dong nhe tren boong tau, tham diem cuoi bang thuyen nan, an brunch va quay lai ben tau truoc gio trua.',
+      },
+    ],
+    includedItems: [
+      'Xe don tra 2 chieu tu Ha Noi',
+      '1 dem phong rieng tren du thuyen',
+      'Bua trua, bua toi, brunch va tra chieu',
+      'Ve tham quan va kayak theo lich trinh',
+    ],
+    promiseItems: [
+      'Tu van rieng de chon hang phong va tang boong',
+      'Co the bo sung ky niem ngay cuoi tuan hoac honeymoon setup',
+      'Ho tro doi lich neu thoi tiet tren vinh thay doi',
+    ],
+  },
+  2: {
+    eyebrow: 'Central signature route',
+    season: 'Quanh nam, dep nhat thang 2 - 8',
+    groupSize: 'Toi da 16 khach',
+    departureNote: 'Thu 6 hang tuan',
+    departureSchedule: 'Bay sang thu 6, tro ve toi thu 2',
+    meetingPoint: 'San bay Da Nang hoac diem hen trong thanh pho',
+    longDescription:
+      'Mot tuyen mien Trung duoc cat may theo nhiep nhanh va nhiep cham: ban co Da Nang rong mo va Hoi An lang mot trong cung mot hanh trinh.',
+    curatorNote:
+      'Day la dang tour rat hop cho cap doi va nhom ban nho. Diem hay la su doi lap giua khoang sang tao cua Da Nang va chat lang cua Hoi An ve dem.',
+    curatorName: 'Hoang Tran, ADN Curator',
+    overviewCards: [
+      {
+        icon: 'flight_takeoff',
+        title: 'Bay thang, vao viec nhanh',
+        description:
+          'Lich bay duoc canh de toi uu 4 ngay 3 dem, giam thoi gian cho doi va tang thoi gian trai nghiem that su.',
+      },
+      {
+        icon: 'nightlife',
+        title: '2 nhiet do trong 1 hanh trinh',
+        description:
+          'Ngay rong va sang o Da Nang, toi am va co chieu sau o Hoi An, giup tour co tiet tau rat de chiu.',
+      },
+      {
+        icon: 'local_dining',
+        title: 'An theo tinh than dia phuong',
+        description:
+          'Mi Quang, cao lau, cafe roastery va mot bua toi rooftop duoc de xuat de giu mau cam xuc cua tuyen.',
+      },
+    ],
+    highlights: [
+      {
+        icon: 'landscape',
+        title: 'Ba Na va cung duong view mo',
+        description: 'Co the linh hoat giua lich city tour, bien hoac doi nui tuy theo nhom khach muc tieu.',
+      },
+      {
+        icon: 'architecture',
+        title: 'Hoi An len den vao buoi toi',
+        description: 'Khung gio duoc canh de pho co len den dung luc, dep va de chup nhat.',
+      },
+      {
+        icon: 'storefront',
+        title: 'Chen cac diem dung co chat',
+        description: 'Khong nhoi qua nhieu diem check-in. Moi diem duoc giu du thoi gian de trai nghiem co do sau.',
+      },
+    ],
+    itinerary: [
+      {
+        label: 'Ngay 1',
+        title: 'Da Nang chao khach bang mot nhiep do nhe',
+        description:
+          'Don san bay, nghi trua, city orientation, rooftop sunset va bua toi khong qua nang de giu nang luong cho ngay tiep theo.',
+      },
+      {
+        label: 'Ngay 2',
+        title: 'Ba Na hoac tuyen bien linh hoat',
+        description:
+          'Tuy muc tieu san pham, ngay nay co the la Ba Na Hills, Son Tra - My Khe hoac luxury free-time cho nhom nghi duong.',
+      },
+      {
+        label: 'Ngay 3',
+        title: 'Hoi An len nhip',
+        description:
+          'Ve pho co, tham nha co, workshop nho, an chieu som va giu khung 17:00 - 20:30 cho trai nghiem pho den long den.',
+      },
+    ],
+    includedItems: [
+      'Ve may bay khu hoi theo goi',
+      'Khach san trung tam Da Nang / Hoi An',
+      'Xe dua don va huong dan vien theo lich',
+      'Mot bua toi signature va mot workshop dia phuong',
+    ],
+    promiseItems: [
+      'Co the tach thanh version nghi duong hoac version check-in',
+      'De dang them shooting, decor sinh nhat hoac honeymoon setup',
+      'Lich trinh linh hoat theo gio bay thuc te',
+    ],
+  },
+  3: {
+    eyebrow: 'Mountain escape',
+    season: 'Thang 9 - thang 4',
+    groupSize: 'Toi da 18 khach',
+    departureNote: 'Khoi hanh thu 5',
+    departureSchedule: 'Dem thu 5 tu Ha Noi, sang thu 6 o Lao Cai',
+    meetingPoint: 'Ga Ha Noi hoac diem hen trung tam',
+    longDescription:
+      'Hanh trinh nay khong chi de san may. Day la mot chuyen di len nui co tiet tau dep, du khoang cho trai nghiem van hoa va nhung frame rong cua Tay Bac.',
+    curatorNote:
+      'Neu muon mot tour ngam nui khong qua rat, day la cau tra loi rat can bang. Fansipan la diem day cam xuc, nhung khong lam lu mo phan van hoa ban dia.',
+    curatorName: 'Minh Phan, ADN Curator',
+    overviewCards: [
+      {
+        icon: 'tram',
+        title: 'Tau dem giu chat hanh trinh',
+        description:
+          'Di tau giup chuyen di co tinh chuyen hoa rat ro: roi thanh pho vao dem va mo mat trong mot khung canh khac.',
+      },
+      {
+        icon: 'terrain',
+        title: 'Can bang giua trekking va nghi',
+        description:
+          'Khong day lich qua manh. Tour duoc giu o muc trai nghiem vua du cho nhom khach mong muon thu suc.',
+      },
+      {
+        icon: 'festival',
+        title: 'Cham van hoa dia phuong',
+        description:
+          'Cho phien, ban lang va khoang an nong la phan lam cho chuyen di co tri nho sau hon mot buoi san may.',
+      },
+    ],
+    highlights: [
+      {
+        icon: 'wb_twilight',
+        title: 'Khung gio san may co chon loc',
+        description: 'Lich duoc canh theo dua thay doi thoi tiet de tang kha nang gap bien may dep.',
+      },
+      {
+        icon: 'hiking',
+        title: 'Do kho vua phai',
+        description: 'Tour hop voi nguoi muon co cai chat adventure nhung van can dich vu cham soc on dinh.',
+      },
+      {
+        icon: 'cottage',
+        title: 'Dem nui am va co nhip',
+        description: 'Phan luu tru va bua toi duoc chon de giu cam giac am ap sau mot ngay di nhieu.',
+      },
+    ],
+    itinerary: [
+      {
+        label: 'Ngay 1',
+        title: 'Len nui, vao khong khi Sapa',
+        description:
+          'Den Sapa, an sang nhe, nghi khoang ngan, sau do bat dau tuyen kham pha ban dia va do cao de co nhiep chuyen can.',
+      },
+      {
+        label: 'Ngay 2',
+        title: 'Fansipan va nhung khung nhin rong',
+        description:
+          'Len cap treo hoac mix cung trekking nhe, canh khung gio tot cho may, sau do quay ve thi tran thu gian va an toi.',
+      },
+      {
+        label: 'Ngay 3',
+        title: 'Cho phien - tro ve',
+        description:
+          'Them mot diem cham van hoa ban dia buoi sang truoc khi len duong tro lai Ha Noi.',
+      },
+    ],
+    includedItems: [
+      'Tau dem hoac xe limousine tuy goi',
+      'Khach san view nui trung tam Sapa',
+      'Ve cap treo / combo len Fansipan theo goi',
+      'Huong dan vien va bua an theo lich',
+    ],
+    promiseItems: [
+      'Co the mo rong thanh phien ban trekking sau hon',
+      'Linh hoat theo thoi tiet de giu trai nghiem dep nhat',
+      'Phu hop cho nhom ban va cong ty nho can retreat ngan',
+    ],
+  },
+  4: {
+    eyebrow: 'Culture and cuisine route',
+    season: 'Thang 1 - thang 8',
+    groupSize: 'Toi da 14 khach',
+    departureNote: 'Thu 6 va Chu nhat',
+    departureSchedule: 'Khoi hanh som tu Da Nang hoac Ha Noi',
+    meetingPoint: 'San bay Phu Bai / trung tam Hue',
+    longDescription:
+      'Day la detail tour dan nhac boi mau sac co do, am thuc cung dinh va nhung khoang di cham. Hue khong duoc xem nhu mot diem stop, ma la mot nhiet do rieng can duoc ngam ky.',
+    curatorNote:
+      'Hue dep khi ban cho no du do sau. Chung toi khong day lich qua day, thay vao do giu khoang cho dai noi, am thuc va nhung cuoc tan bo de thanh pho tu mo minh.',
+    curatorName: 'Lan Anh, ADN Curator',
+    overviewCards: [
+      {
+        icon: 'castle',
+        title: 'Co do trong mot nhiep di cham',
+        description:
+          'Lich trinh de khoang cho ban ngam Hue bang ca mat va tai, khong chi check-in nhanh qua cac cong trinh.',
+      },
+      {
+        icon: 'ramen_dining',
+        title: 'Am thuc la mot cot tru',
+        description:
+          'Hanh trinh an uong duoc dat ngang hang voi tham quan, tu mon cung dinh den quan nha nho co chat rieng.',
+      },
+      {
+        icon: 'self_improvement',
+        title: 'Nhe nhang ma giau chat lieu',
+        description:
+          'Phu hop voi cap doi, gia dinh nho hoac nhom muon mot chuyen di co tinh thuong thuc hon la chay dua diem den.',
+      },
+    ],
+    highlights: [
+      {
+        icon: 'account_balance',
+        title: 'Dai Noi va nhung lop lich su',
+        description: 'Duoc canh gio de tranh dong, giu nhiep tham quan thong dong va de nghe cau chuyen tot hon.',
+      },
+      {
+        icon: 'restaurant',
+        title: 'Ban an Hue co chu de',
+        description: 'Tu bua sang dan da den bua toi chi tiet hon, tour co cot am thuc ro net thay vi chi ghe ngau nhien.',
+      },
+      {
+        icon: 'directions_walk',
+        title: 'Thanh pho hop de di bo',
+        description: 'Nhieu doan duoc thiet ke cho tan bo ngan de cam nhan Hue bang nhiep thoi gian that.',
+      },
+    ],
+    itinerary: [
+      {
+        label: 'Ngay 1',
+        title: 'Vao Hue va can nhiet do',
+        description:
+          'Check-in, an trua nhe, di mot vong mo nhan thanh pho va bat dau bang mot diem den de vao khong khi Hue that tu nhien.',
+      },
+      {
+        label: 'Ngay 2',
+        title: 'Dai Noi - lang tam - bua toi theo concept',
+        description:
+          'Ngay cot song cua hanh trinh: tham quan di san, chen diem nghi, sau do khop lai bang bua toi co tinh trinh dien am thuc.',
+      },
+      {
+        label: 'Ngay 3',
+        title: 'Cafe sang, mua qua, ket tour',
+        description:
+          'Giu mot buoi sang nhe de thanh pho dong lai dep truoc khi khach roi Hue.',
+      },
+    ],
+    includedItems: [
+      'Luu tru trung tam Hue',
+      'Xe dua don va huong dan suot tuyen',
+      'Ve vao cong di san va mot bua toi signature',
+      'Danh sach diem an va cafe de xuat theo concept',
+    ],
+    promiseItems: [
+      'Co the nang cap thanh tour couple hoac tour family heritage',
+      'Phu hop nhom khach yeu am thuc va kien truc',
+      'Rat de mo rong sang combo Hue - Da Nang - Hoi An',
+    ],
+  },
+};
+
+export function getTourById(tourId) {
+  const baseTour = toursContent.tours.find((tour) => String(tour.id) === String(tourId));
+
+  if (!baseTour) {
+    return null;
+  }
+
+  return {
+    ...baseTour,
+    ...tourDetailContentById[baseTour.id],
+  };
+}
+
 export const aboutContent = {
   hero: {
     image: aboutHeroImage,

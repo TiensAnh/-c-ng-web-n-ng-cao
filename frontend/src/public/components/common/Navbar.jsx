@@ -3,11 +3,15 @@ import { NavLink } from 'react-router-dom';
 import brandLogo from '../../../shared/assets/images/Logo.png';
 import AuthModal from '../../../shared/components/AuthModal';
 import Button from '../../../shared/components/Button';
+import { useAuth } from '../../../shared/context/AuthContext';
 import { classNames } from '../../../shared/utils/classNames';
 import { navigationLinks } from '../../services/siteContentService';
 
 function Navbar() {
+  const { isAuthenticated, logout, user } = useAuth();
   const [authMode, setAuthMode] = useState(null);
+  const displayName = user?.name?.trim() || 'Nguoi dung';
+  const avatarLabel = displayName.charAt(0).toUpperCase();
 
   const handleOpenAuthModal = (mode) => {
     setAuthMode(mode);
@@ -47,23 +51,44 @@ function Navbar() {
             </div>
 
             <Button className="site-navbar__support" variant="ghost">
-              Hỗ trợ
+              Ho tro
             </Button>
 
-            <Button
-              className="site-navbar__login site-navbar__auth-trigger"
-              variant="secondary"
-              onClick={() => handleOpenAuthModal('login')}
-            >
-              Đăng nhập
-            </Button>
+            {isAuthenticated ? (
+              <>
+                <div className="site-navbar__user" aria-label={`Tai khoan ${displayName}`}>
+                  <span className="site-navbar__user-avatar" aria-hidden="true">
+                    {avatarLabel}
+                  </span>
 
-            <Button
-              className="site-navbar__signup site-navbar__auth-trigger"
-              onClick={() => handleOpenAuthModal('register')}
-            >
-              Đăng ký
-            </Button>
+                  <div className="site-navbar__user-copy">
+                    <span className="site-navbar__user-label">Tai khoan</span>
+                    <strong className="site-navbar__user-name">{displayName}</strong>
+                  </div>
+                </div>
+
+                <Button className="site-navbar__auth-trigger" variant="secondary" onClick={logout}>
+                  Dang xuat
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  className="site-navbar__login site-navbar__auth-trigger"
+                  variant="secondary"
+                  onClick={() => handleOpenAuthModal('login')}
+                >
+                  Dang nhap
+                </Button>
+
+                <Button
+                  className="site-navbar__signup site-navbar__auth-trigger"
+                  onClick={() => handleOpenAuthModal('register')}
+                >
+                  Dang ky
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -73,7 +98,6 @@ function Navbar() {
         mode={authMode ?? 'login'}
         onClose={handleCloseAuthModal}
         onModeChange={handleOpenAuthModal}
-        
       />
     </>
   );

@@ -1,6 +1,9 @@
 export const ROUTES = {
+  login: '/admin/login',
+  register: '/admin/register',
   dashboard: '/admin/dashboard',
   tours: '/admin/tours',
+  newTour: '/admin/tours/new',
   bookings: '/admin/bookings',
   users: '/admin/users',
   reviews: '/admin/reviews',

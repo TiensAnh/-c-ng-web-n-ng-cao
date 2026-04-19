@@ -1,10 +1,20 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import brandLogo from '../../shared/assets/images/Logo.png';
+import { useAdminAuth } from '../context/AdminAuthContext';
 import { NAV_ITEMS, ROUTES } from '../utils/routes';
 import Avatar from './Avatar';
 import Icon from './Icon';
 
 export default function Sidebar({ onClose, open, profile, subtitle }) {
+  const navigate = useNavigate();
+  const { logoutAdmin } = useAdminAuth();
+
+  const handleLogout = () => {
+    logoutAdmin();
+    onClose?.();
+    navigate(ROUTES.login, { replace: true });
+  };
+
   return (
     <div className="lg:pointer-events-auto">
       <button
@@ -41,7 +51,13 @@ export default function Sidebar({ onClose, open, profile, subtitle }) {
           </NavLink>
           {profile ? (
             <div className="mt-5 flex items-center gap-3">
-              <Avatar src={profile.avatar} alt={profile.name} className="h-10 w-10 rounded-full" initials={profile.name} />
+              <Avatar
+                src={profile.avatar}
+                alt={profile.name}
+                className="h-10 w-10 rounded-full"
+                fallbackClassName="bg-primary text-on-primary shadow-sm"
+                initials={profile.name}
+              />
               <div>
                 <p className="text-sm font-bold text-on-surface">{profile.name}</p>
                 <p className="text-xs text-slate-500">{profile.role}</p>
@@ -73,7 +89,11 @@ export default function Sidebar({ onClose, open, profile, subtitle }) {
         </nav>
 
         <div className="mt-auto border-t border-slate-100 px-4 pt-4">
-          <button type="button" className="sidebar-nav-item w-full justify-start text-slate-500 hover:text-error">
+          <button
+            type="button"
+            className="sidebar-nav-item w-full justify-start text-slate-500 hover:text-error"
+            onClick={handleLogout}
+          >
             <Icon name="logout" />
             <span className="text-sm">Logout</span>
           </button>

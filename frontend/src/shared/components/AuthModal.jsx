@@ -1,5 +1,6 @@
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import Button from './Button';
+import { useAuth } from '../context/AuthContext';
 import { classNames } from '../utils/classNames';
 
 const INITIAL_LOGIN_FORM = {
@@ -19,47 +20,45 @@ const INITIAL_REGISTER_FORM = {
 const MODAL_COPY = {
   login: {
     eyebrow: 'ADN Explorer Club',
-    title: 'Chào mừng bạn quay trở lại',
+    title: 'Chao mung ban quay tro lai',
     description:
-      'Đăng nhập để quản lý hành trình, theo dõi đặt chỗ và nhận ưu đãi dành riêng cho thành viên ADN Travel.',
+      'Dang nhap de quan ly hanh trinh, theo doi dat cho va nhan uu dai danh rieng cho thanh vien ADN Travel.',
     benefits: [
-      'Lưu lịch sử đặt tour và thông tin hành khách an toàn.',
-      'Nhận thông báo ưu đãi sớm hơn và mã giảm giá theo mùa.',
-      'Theo dõi trạng thái booking và yêu cầu hỗ trợ nhanh hơn.',
+      'Luu lich su dat tour va thong tin hanh khach an toan.',
+      'Nhan thong bao uu dai som hon va ma giam gia theo mua.',
+      'Theo doi trang thai booking va gui yeu cau ho tro nhanh hon.',
     ],
-    heading: 'Đăng nhập tài khoản',
-    subheading: 'Nhập email và mật khẩu để tiếp tục hành trình của bạn.',
-    submitLabel: 'Đăng nhập',
-    switchLabel: 'Chưa có tài khoản?',
-    switchAction: 'Đăng ký ngay',
-    successMessage:
-      'Đăng nhập mẫu thành công. Bạn có thể nối API thật vào modal này ở bước tiếp theo.',
+    heading: 'Dang nhap tai khoan',
+    subheading: 'Nhap email va mat khau de tiep tuc hanh trinh cua ban.',
+    submitLabel: 'Dang nhap',
+    switchLabel: 'Chua co tai khoan?',
+    switchAction: 'Dang ky ngay',
   },
   register: {
-    eyebrow: 'Thành viên ADN Travel',
-    title: 'Bắt đầu hành trình của riêng bạn',
+    eyebrow: 'Thanh vien ADN Travel',
+    title: 'Bat dau hanh trinh cua rieng ban',
     description:
-      'Tạo tài khoản để lưu yêu thích, nhận ưu đãi độc quyền và kết nối với đội ngũ hỗ trợ của ADN Travel.',
+      'Tao tai khoan de luu yeu thich, nhan uu dai doc quyen va ket noi voi doi ngu ho tro cua ADN Travel.',
     benefits: [
-      'Nhận ưu đãi tân thủ và thông tin khuyến mại du lịch mới nhất.',
-      'Đồng bộ thông tin đặt tour, hóa đơn và lịch sử thanh toán.',
-      'Mở khóa không gian thành viên cho những chuyến đi cá nhân hóa.',
+      'Nhan uu dai tan thu va thong tin khuyen mai du lich moi nhat.',
+      'Dong bo thong tin dat tour, hoa don va lich su thanh toan.',
+      'Mo khoa khong gian thanh vien cho nhung chuyen di ca nhan hoa.',
     ],
-    heading: 'Tạo tài khoản mới',
-    subheading: 'Điền thông tin cơ bản để ADN Travel giữ cho bạn những ưu đãi đẹp nhất.',
-    submitLabel: 'Tạo tài khoản',
-    switchLabel: 'Đã có tài khoản?',
-    switchAction: 'Đăng nhập',
-    successMessage:
-      'Đăng ký mẫu thành công. Bạn chỉ cần kết nối API backend để lưu tài khoản thật.',
+    heading: 'Tao tai khoan moi',
+    subheading: 'Dien thong tin co ban de ADN Travel giu cho ban nhung uu dai dep nhat.',
+    submitLabel: 'Tao tai khoan',
+    switchLabel: 'Da co tai khoan?',
+    switchAction: 'Dang nhap',
   },
 };
 
-function AuthModal({ isOpen, mode, onClose, onModeChange }) {
+function AuthModal({ isOpen, mode, onClose, onModeChange, onSuccess }) {
+  const { login, register } = useAuth();
   const [loginForm, setLoginForm] = useState(INITIAL_LOGIN_FORM);
   const [registerForm, setRegisterForm] = useState(INITIAL_REGISTER_FORM);
   const [feedback, setFeedback] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const closeTimeoutRef = useRef(null);
   const titleId = useId();
   const descriptionId = useId();
 
@@ -83,6 +82,14 @@ function AuthModal({ isOpen, mode, onClose, onModeChange }) {
       window.removeEventListener('keydown', handleEscape);
     };
   }, [isOpen, onClose]);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) {
+        window.clearTimeout(closeTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     setFeedback(null);
@@ -118,29 +125,50 @@ function AuthModal({ isOpen, mode, onClose, onModeChange }) {
     if (mode === 'register' && registerForm.password !== registerForm.confirmPassword) {
       setFeedback({
         type: 'error',
-        message: 'Mật khẩu xác nhận chưa khớp. Vui lòng kiểm tra lại.',
+        message: 'Mat khau xac nhan chua khop. Vui long kiem tra lai.',
       });
       return;
     }
 
     setIsSubmitting(true);
 
-    await new Promise((resolve) => {
-      window.setTimeout(resolve, 500);
-    });
+    try {
+      const response = mode === 'login'
+        ? await login(
+          {
+            email: loginForm.email,
+            password: loginForm.password,
+          },
+          { rememberMe: loginForm.rememberMe },
+        )
+        : await register({
+          fullName: registerForm.fullName,
+          email: registerForm.email,
+          phone: registerForm.phone,
+          password: registerForm.password,
+          confirmPassword: registerForm.confirmPassword,
+        });
 
-    setFeedback({
-      type: 'success',
-      message: activeCopy.successMessage,
-    });
-    setIsSubmitting(false);
+      setFeedback({
+        type: 'success',
+        message: response.message || (mode === 'login' ? 'Dang nhap thanh cong.' : 'Dang ky thanh cong.'),
+      });
 
-    if (mode === 'login') {
       setLoginForm(INITIAL_LOGIN_FORM);
-      return;
-    }
+      setRegisterForm(INITIAL_REGISTER_FORM);
 
-    setRegisterForm(INITIAL_REGISTER_FORM);
+      closeTimeoutRef.current = window.setTimeout(() => {
+        onSuccess?.(response);
+        onClose();
+      }, 700);
+    } catch (error) {
+      setFeedback({
+        type: 'error',
+        message: error.message || 'Khong the xu ly yeu cau luc nay.',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderLoginForm = () => (
@@ -162,13 +190,13 @@ function AuthModal({ isOpen, mode, onClose, onModeChange }) {
       </div>
 
       <div className="auth-modal__field">
-        <label htmlFor="auth-login-password">Mật khẩu</label>
+        <label htmlFor="auth-login-password">Mat khau</label>
         <input
           autoComplete="current-password"
           className="auth-modal__input"
           id="auth-login-password"
           name="password"
-          placeholder="Nhập mật khẩu của bạn"
+          placeholder="Nhap mat khau cua ban"
           required
           type="password"
           value={loginForm.password}
@@ -185,11 +213,11 @@ function AuthModal({ isOpen, mode, onClose, onModeChange }) {
             type="checkbox"
             onChange={handleLoginChange}
           />
-          <span>Ghi nhớ đăng nhập</span>
+          <span>Ghi nho dang nhap</span>
         </label>
 
         <button className="auth-modal__link" type="button">
-          Quên mật khẩu?
+          Quen mat khau?
         </button>
       </div>
     </>
@@ -199,7 +227,7 @@ function AuthModal({ isOpen, mode, onClose, onModeChange }) {
     <>
       <div className="auth-modal__grid">
         <div className="auth-modal__field">
-          <label htmlFor="auth-register-name">Họ và tên</label>
+          <label htmlFor="auth-register-name">Ho va ten</label>
           <input
             autoComplete="name"
             autoFocus
@@ -215,13 +243,14 @@ function AuthModal({ isOpen, mode, onClose, onModeChange }) {
         </div>
 
         <div className="auth-modal__field">
-          <label htmlFor="auth-register-phone">Số điện thoại</label>
+          <label htmlFor="auth-register-phone">So dien thoai</label>
           <input
             autoComplete="tel"
             className="auth-modal__input"
             id="auth-register-phone"
             name="phone"
-            placeholder="0901 234 567"
+            pattern="[0-9]{9,11}"
+            placeholder="0901234567"
             required
             type="tel"
             value={registerForm.phone}
@@ -247,13 +276,14 @@ function AuthModal({ isOpen, mode, onClose, onModeChange }) {
 
       <div className="auth-modal__grid">
         <div className="auth-modal__field">
-          <label htmlFor="auth-register-password">Mật khẩu</label>
+          <label htmlFor="auth-register-password">Mat khau</label>
           <input
             autoComplete="new-password"
             className="auth-modal__input"
             id="auth-register-password"
+            minLength={6}
             name="password"
-            placeholder="Tối thiểu 8 ký tự"
+            placeholder="Toi thieu 6 ky tu"
             required
             type="password"
             value={registerForm.password}
@@ -262,13 +292,14 @@ function AuthModal({ isOpen, mode, onClose, onModeChange }) {
         </div>
 
         <div className="auth-modal__field">
-          <label htmlFor="auth-register-confirm">Xác nhận mật khẩu</label>
+          <label htmlFor="auth-register-confirm">Xac nhan mat khau</label>
           <input
             autoComplete="new-password"
             className="auth-modal__input"
             id="auth-register-confirm"
+            minLength={6}
             name="confirmPassword"
-            placeholder="Nhập lại mật khẩu"
+            placeholder="Nhap lai mat khau"
             required
             type="password"
             value={registerForm.confirmPassword}
@@ -282,7 +313,7 @@ function AuthModal({ isOpen, mode, onClose, onModeChange }) {
   return (
     <div className="auth-modal">
       <button
-        aria-label="Đóng cửa sổ đăng nhập"
+        aria-label="Dong cua so dang nhap"
         className="auth-modal__backdrop"
         type="button"
         onClick={onClose}
@@ -311,11 +342,11 @@ function AuthModal({ isOpen, mode, onClose, onModeChange }) {
         </aside>
 
         <section className="auth-modal__content">
-          <button aria-label="Đóng modal" className="auth-modal__close" type="button" onClick={onClose}>
-            <span aria-hidden="true">×</span>
+          <button aria-label="Dong modal" className="auth-modal__close" type="button" onClick={onClose}>
+            <span aria-hidden="true">x</span>
           </button>
 
-          <div className="auth-modal__tabs" role="tablist" aria-label="Lựa chọn xác thực">
+          <div className="auth-modal__tabs" role="tablist" aria-label="Lua chon xac thuc">
             <button
               aria-selected={mode === 'login'}
               className={classNames('auth-modal__tab', mode === 'login' && 'auth-modal__tab--active')}
@@ -323,7 +354,7 @@ function AuthModal({ isOpen, mode, onClose, onModeChange }) {
               type="button"
               onClick={() => onModeChange('login')}
             >
-              Đăng nhập
+              Dang nhap
             </button>
             <button
               aria-selected={mode === 'register'}
@@ -332,7 +363,7 @@ function AuthModal({ isOpen, mode, onClose, onModeChange }) {
               type="button"
               onClick={() => onModeChange('register')}
             >
-              Đăng ký
+              Dang ky
             </button>
           </div>
 
@@ -363,7 +394,7 @@ function AuthModal({ isOpen, mode, onClose, onModeChange }) {
 
               <div className="auth-modal__actions">
                 <Button className="auth-modal__submit" disabled={isSubmitting} type="submit">
-                  {isSubmitting ? 'Đang xử lý...' : activeCopy.submitLabel}
+                  {isSubmitting ? 'Dang xu ly...' : activeCopy.submitLabel}
                 </Button>
 
                 <p className="auth-modal__switch">

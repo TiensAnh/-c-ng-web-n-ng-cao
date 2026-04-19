@@ -1,81 +1,60 @@
 import { images } from "../assets";
 import { ROUTES } from "../utils/routes";
 
-const defaultSidebarProfile = {
+const sharedAdminProfile = {
   name: "Admin Curator",
-  role: "Super Admin",
-  avatar: images.dashboardSidebarProfile,
+  role: "Administrator",
+  avatar: null,
 };
 
 export const layoutContent = {
   [ROUTES.dashboard]: {
     breadcrumb: "Dashboard",
-    sidebarProfile: defaultSidebarProfile,
+    sidebarProfile: sharedAdminProfile,
     sidebarSubtitle: "Admin Curator",
-    topbarProfile: {
-      name: "Admin Curator",
-      role: "Super Admin",
-      avatar: images.dashboardTopbarAvatar,
-    },
+    topbarProfile: null,
     topbarSearchPlaceholder: "",
   },
   [ROUTES.tours]: {
     breadcrumb: "Tours",
-    sidebarProfile: defaultSidebarProfile,
+    sidebarProfile: sharedAdminProfile,
     sidebarSubtitle: "Admin Curator",
-    topbarProfile: {
-      name: "Alex Curator",
-      role: "Super Admin",
-      avatar: images.toursTopbarAvatar,
-    },
+    topbarProfile: null,
+    topbarSearchPlaceholder: "",
+  },
+  [ROUTES.newTour]: {
+    breadcrumb: "Create Tour",
+    sidebarProfile: sharedAdminProfile,
+    sidebarSubtitle: "Admin Curator",
+    topbarProfile: null,
     topbarSearchPlaceholder: "",
   },
   [ROUTES.bookings]: {
     breadcrumb: "Bookings",
-    sidebarProfile: defaultSidebarProfile,
+    sidebarProfile: sharedAdminProfile,
     sidebarSubtitle: "Admin Curator",
-    topbarProfile: {
-      name: "Alex Rivera",
-      role: "Head Curator",
-      avatar: images.bookingsTopbarAvatar,
-    },
+    topbarProfile: null,
     topbarSearchPlaceholder: "",
   },
   [ROUTES.users]: {
     breadcrumb: "Users",
-    sidebarProfile: {
-      name: "Admin Curator",
-      role: "Global Horizon",
-      avatar: images.usersSidebarProfile,
-    },
+    sidebarProfile: sharedAdminProfile,
     sidebarSubtitle: "Admin Curator",
     topbarProfile: null,
     topbarSearchPlaceholder: "Search user by name or email...",
   },
   [ROUTES.reviews]: {
     breadcrumb: "Reviews",
-    sidebarProfile: {
-      name: "Admin Curator",
-      role: "Global Moderator",
-      avatar: images.reviewsSidebarProfile,
-    },
+    sidebarProfile: sharedAdminProfile,
     sidebarSubtitle: "Admin Curator",
-    topbarProfile: {
-      name: "",
-      role: "",
-      avatar: images.reviewsTopbarAvatar,
-    },
+    topbarProfile: null,
     topbarSearchPlaceholder: "",
   },
   [ROUTES.payments]: {
     breadcrumb: "Payments",
-    sidebarProfile: defaultSidebarProfile,
+    sidebarProfile: sharedAdminProfile,
     sidebarSubtitle: "Admin Curator",
-    topbarProfile: {
-      name: "Alex Horizon",
-      role: "Finance Lead",
-      avatar: images.paymentsTopbarProfile,
-    },
+    topbarProfile: null,
     topbarSearchPlaceholder: "",
   },
 };

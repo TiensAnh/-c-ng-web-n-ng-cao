@@ -1,21 +1,90 @@
-// Xác thực JWT
-const jwtUtil = require('../config/jwt');
+const jwt = require('jsonwebtoken');
 
-exports.verifyToken = (req, res, next) => {
-  const header = req.headers['authorization'];
-  if (!header) return res.status(401).json({ message: 'Không có token' });
+const db = require('../config/db');
 
-  const token = header.split(' ')[1];
-  try {
-    req.user = jwtUtil.verify(token);
-    next();
-  } catch {
-    res.status(401).json({ message: 'Token không hợp lệ hoặc đã hết hạn' });
+function extractBearerToken(authorizationHeader = '') {
+  if (!authorizationHeader.startsWith('Bearer ')) {
+    return null;
   }
-};
 
-exports.isAdmin = (req, res, next) => {
-  if (req.user?.role !== 'admin')
-    return res.status(403).json({ message: 'Chỉ admin mới được truy cập' });
-  next();
+  return authorizationHeader.slice(7).trim() || null;
+}
+
+function sanitizeUser(user) {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    role: user.role,
+  };
+}
+
+async function authenticateToken(req, res, next) {
+  const token = extractBearerToken(req.headers.authorization);
+
+  if (!token) {
+    return res.status(401).json({
+      message: 'Ban chua dang nhap hoac token khong hop le.',
+    });
+  }
+
+  if (!process.env.JWT_SECRET) {
+    return res.status(500).json({
+      message: 'Server chua duoc cau hinh JWT_SECRET.',
+    });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const [users] = await db.query(
+      'SELECT id, name, email, phone, role FROM users WHERE id = ? LIMIT 1',
+      [decoded.id],
+    );
+
+    if (users.length === 0) {
+      return res.status(401).json({
+        message: 'Tai khoan khong ton tai hoac da bi xoa.',
+      });
+    }
+
+    req.user = sanitizeUser(users[0]);
+    req.token = token;
+
+    return next();
+  } catch (error) {
+    return res.status(401).json({
+      message: 'Token het han hoac khong hop le.',
+    });
+  }
+}
+
+function authorizeRoles(...allowedRoles) {
+  const normalizedRoles = allowedRoles.map((role) => String(role).toUpperCase());
+
+  return (req, res, next) => {
+    const currentRole = String(req.user?.role || '').toUpperCase();
+
+    if (!currentRole) {
+      return res.status(401).json({
+        message: 'Khong xac dinh duoc thong tin nguoi dung.',
+      });
+    }
+
+    if (!normalizedRoles.includes(currentRole)) {
+      return res.status(403).json({
+        message: 'Ban khong co quyen truy cap tai nguyen nay.',
+      });
+    }
+
+    return next();
+  };
+}
+
+const requireAdmin = authorizeRoles('ADMIN');
+
+module.exports = {
+  authenticateToken,
+  authorizeRoles,
+  requireAdmin,
 };

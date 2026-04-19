@@ -1,34 +1,52 @@
-// Khởi tạo Express app
-const express    = require('express');
-const cors       = require('cors');
-const helmet     = require('helmet');
-const morgan     = require('morgan');
-const session    = require('express-session');
+const cors = require('cors');
+const express = require('express');
+const helmet = require('helmet');
+const morgan = require('morgan');
+
 require('dotenv').config();
 
-const app = express();
+const adminAuthRoutes = require('../routes/adminAuth.routes');
+const authRoutes = require('../routes/auth.routes');
 
-app.use(helmet());
-app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:3000', credentials: true }));
+const app = express();
+const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+app.use(
+  cors({
+    origin: frontendUrl,
+    credentials: true,
+  }),
+);
+app.use(
+  helmet({
+    crossOriginResourcePolicy: false,
+  }),
+);
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'travel_secret',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 },
-}));
 
-// Routes
-app.use('/api/auth',       require('../routes/auth.routes'));
-app.use('/api/tours',      require('../routes/tour.routes'));
-app.use('/api/categories', require('../routes/category.routes'));
-app.use('/api/bookings',   require('../routes/booking.routes'));
-app.use('/api/payments',   require('../routes/payment.routes'));
-app.use('/api/users',      require('../routes/user.routes'));
-app.use('/api/admin',      require('../routes/admin.routes'));
-app.use('/api/chatbot',    require('../routes/chatbot.routes'));
-app.use('/api/stats',      require('../routes/stats.routes'));
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    message: 'API is running',
+  });
+});
+
+app.use('/api/auth', authRoutes);
+app.use('/api/admin-auth', adminAuthRoutes);
+
+app.use((req, res) => {
+  res.status(404).json({
+    message: 'Route not found',
+  });
+});
+
+app.use((error, req, res, next) => {
+  console.error(error);
+
+  res.status(500).json({
+    message: 'Internal server error',
+  });
+});
 
 module.exports = app;

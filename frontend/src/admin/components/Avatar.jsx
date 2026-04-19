@@ -1,4 +1,4 @@
-import { cn } from "../utils/formatters";
+import { cn, getInitials } from "../utils/formatters";
 
 export default function Avatar({
   src,
@@ -11,6 +11,8 @@ export default function Avatar({
     return <img src={src} alt={alt} className={cn("object-cover", className)} />;
   }
 
+  const fallbackInitials = getInitials(initials) || "AD";
+
   return (
     <div
       className={cn(
@@ -20,7 +22,7 @@ export default function Avatar({
       )}
       aria-hidden="true"
     >
-      {initials}
+      {fallbackInitials}
     </div>
   );
 }

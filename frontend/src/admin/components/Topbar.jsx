@@ -1,4 +1,3 @@
-import Avatar from "./Avatar";
 import IconButton from "./IconButton";
 import SearchInput from "./SearchInput";
 
@@ -6,7 +5,6 @@ export default function Topbar({
   breadcrumb,
   onMenuClick,
   onSearchChange,
-  profile,
   searchPlaceholder,
   searchValue,
 }) {
@@ -35,22 +33,6 @@ export default function Topbar({
           <IconButton icon="notifications" />
           <IconButton icon="settings" />
         </div>
-        {profile ? (
-          <div className="hidden items-center gap-3 border-l border-slate-100 pl-6 sm:flex">
-            {profile.name ? (
-              <div className="text-right">
-                <p className="font-headline text-xs font-bold text-on-surface">{profile.name}</p>
-                <p className="text-[10px] text-slate-500">{profile.role}</p>
-              </div>
-            ) : null}
-            <Avatar
-              src={profile.avatar}
-              alt={profile.name || "Admin profile"}
-              className="h-9 w-9 rounded-full border border-slate-100"
-              initials={profile.name}
-            />
-          </div>
-        ) : null}
       </div>
     </header>
   );
