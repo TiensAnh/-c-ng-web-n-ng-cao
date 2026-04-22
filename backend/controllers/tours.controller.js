@@ -592,7 +592,7 @@ exports.getTours = async (req, res) => {
   const requestedStatus = normalizeText(req.query.status);
 
   // Phân trang: mặc định 8 tours/trang, số trang lấy động từ DB
-  const LIMIT = 8;
+  const LIMIT = Math.min(parsePositiveInteger(req.query.limit) || 8, 500);
   const page = Math.max(1, parsePositiveInteger(req.query.page) || 1);
   const offset = (page - 1) * LIMIT;
 

@@ -10,7 +10,8 @@ import {
   toursSidebarContent,
 } from '../services/toursApiService';
 
-const DURATION_ORDER = ['1-3 ngày', '4-7 ngày', 'Trên 1 tuần'];
+const DURATION_ORDER = ['1-3 ngay', '4-7 ngay', 'Tren 1 tuan'];
+const TOURS_PER_PAGE = 8;
 
 function sortDurationOptions(options) {
   return [...options].sort((left, right) => (
@@ -27,6 +28,7 @@ function ToursPage() {
   const [tours, setTours] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     let isMounted = true;
@@ -36,16 +38,16 @@ function ToursPage() {
       setLoadError('');
 
       try {
-        const response = await getPublicToursRequest();
+        const response = await getPublicToursRequest({
+          status: 'Active',
+          limit: 500,
+        });
 
         if (!isMounted) {
           return;
         }
 
-        const nextTours = (response.tours || [])
-          .filter((tour) => tour.status === 'Active')
-          .map(mapApiTourToCard);
-
+        const nextTours = (response.tours || []).map(mapApiTourToCard);
         setTours(nextTours);
       } catch (error) {
         if (!isMounted) {
@@ -53,7 +55,7 @@ function ToursPage() {
         }
 
         setTours([]);
-        setLoadError(error.message || 'Không thể tải danh sách tour lúc này.');
+        setLoadError(error.message || 'Khong the tai danh sach tour luc nay.');
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -92,6 +94,28 @@ function ToursPage() {
   const durationOptions = sortDurationOptions(
     [...new Set(tours.map((tour) => tour.durationGroup).filter(Boolean))],
   );
+  const totalPages = Math.max(1, Math.ceil(filteredTours.length / TOURS_PER_PAGE));
+  const paginatedTours = filteredTours.slice(
+    (currentPage - 1) * TOURS_PER_PAGE,
+    currentPage * TOURS_PER_PAGE,
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    searchText,
+    selectedDuration,
+    selectedRating,
+    sortBy,
+    priceRange,
+    selectedDestinations.join('|'),
+  ]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   return (
     <section className="tours-page section-block">
@@ -118,11 +142,15 @@ function ToursPage() {
         />
 
         <ToursResultsSection
-          filteredTours={filteredTours}
+          currentPage={currentPage}
+          filteredTours={paginatedTours}
           isLoading={isLoading}
           loadError={loadError}
+          onPageChange={setCurrentPage}
           sortBy={sortBy}
           setSortBy={setSortBy}
+          totalPages={totalPages}
+          totalTours={filteredTours.length}
         />
       </div>
     </section>

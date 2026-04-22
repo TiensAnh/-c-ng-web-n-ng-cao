@@ -1,31 +1,41 @@
 import TourCard from '../cards/TourCard';
 import { formatTourCount } from '../../../shared/utils/formatters';
 
-function ToursResultsSection({ filteredTours, loadError = '', isLoading = false, sortBy, setSortBy }) {
+function ToursResultsSection({
+  currentPage = 1,
+  filteredTours,
+  loadError = '',
+  isLoading = false,
+  onPageChange,
+  sortBy,
+  setSortBy,
+  totalPages = 1,
+  totalTours = 0,
+}) {
   return (
     <section className="tours-results">
       <div className="tours-results__header">
         <div>
-          <h1 className="tours-results__title">Tìm thấy {formatTourCount(filteredTours.length)} Tour</h1>
+          <h1 className="tours-results__title">Tim thay {formatTourCount(totalTours)} Tour</h1>
           <p className="tours-results__description">
-            Những hành trình được thiết kế riêng cho tâm hồn lữ khách.
+            Nhung hanh trinh duoc thiet ke rieng cho tam hon lu khach.
           </p>
         </div>
 
         <label className="tours-results__sort">
-          <span>Sắp xếp:</span>
+          <span>Sap xep:</span>
           <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
-            <option value="popular">Phổ biến nhất</option>
-            <option value="price-asc">Giá: Thấp đến cao</option>
-            <option value="price-desc">Giá: Cao đến thấp</option>
-            <option value="rating">Đánh giá cao nhất</option>
+            <option value="popular">Pho bien nhat</option>
+            <option value="price-asc">Gia: Thap den cao</option>
+            <option value="price-desc">Gia: Cao den thap</option>
+            <option value="rating">Danh gia cao nhat</option>
           </select>
         </label>
       </div>
 
       {isLoading ? (
         <div className="surface-card rounded-[2rem] px-6 py-10 text-center text-sm text-slate-500">
-          Đang tải danh sách tour...
+          Dang tai danh sach tour...
         </div>
       ) : loadError ? (
         <div className="surface-card rounded-[2rem] px-6 py-10 text-center text-sm text-rose-500">
@@ -39,14 +49,37 @@ function ToursResultsSection({ filteredTours, loadError = '', isLoading = false,
         </div>
       ) : (
         <div className="surface-card rounded-[2rem] px-6 py-10 text-center text-sm text-slate-500">
-          Chưa có tour phù hợp với bộ lọc hiện tại.
+          Chua co tour phu hop voi bo loc hien tai.
         </div>
       )}
 
-      {filteredTours.length ? (
+      {totalTours > 0 && totalPages > 1 ? (
         <div className="pagination">
-          <button type="button" className="pagination__item pagination__item--active">
-            1
+          <button
+            type="button"
+            className="pagination__item"
+            disabled={currentPage === 1}
+            onClick={() => onPageChange(currentPage - 1)}
+          >
+            &lt;
+          </button>
+          {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+            <button
+              key={page}
+              type="button"
+              className={`pagination__item ${page === currentPage ? 'pagination__item--active' : ''}`}
+              onClick={() => onPageChange(page)}
+            >
+              {page}
+            </button>
+          ))}
+          <button
+            type="button"
+            className="pagination__item"
+            disabled={currentPage === totalPages}
+            onClick={() => onPageChange(currentPage + 1)}
+          >
+            &gt;
           </button>
         </div>
       ) : null}

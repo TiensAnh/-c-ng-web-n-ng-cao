@@ -233,3 +233,55 @@
     grid-template-columns: 1fr;
   }
 }
+
+.tour-booking-form {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.tour-booking-form__field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.tour-booking-form__field span {
+  color: rgba(15, 23, 42, 0.72);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tour-booking-form__field input,
+.tour-booking-form__field select {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+  color: #0f172a;
+  font: inherit;
+  padding: 0.9rem 1rem;
+}
+
+.tour-booking-form__hint,
+.tour-booking-form__message {
+  border-radius: 18px;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  padding: 0.85rem 1rem;
+}
+
+.tour-booking-form__hint {
+  background: rgba(15, 23, 42, 0.06);
+  color: #334155;
+}
+
+.tour-booking-form__message--error {
+  background: #fff1f2;
+  color: #be123c;
+}
+
+.tour-booking-form__message--success {
+  background: #ecfdf5;
+  color: #047857;
+}

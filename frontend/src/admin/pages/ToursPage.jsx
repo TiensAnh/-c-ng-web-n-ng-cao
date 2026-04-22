@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { images } from '../assets';
 import Button from '../components/Button';
 import DataTable from '../components/DataTable';
@@ -10,10 +10,11 @@ import SearchInput from '../components/SearchInput';
 import SectionCard from '../components/SectionCard';
 import StatCard from '../components/StatCard';
 import StatusBadge from '../components/StatusBadge';
+import { useAdminAuth } from '../context/AdminAuthContext';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { toursPage } from '../services/adminService';
-import { getToursRequest, resolveTourImageUrl } from '../services/toursService';
-import { ROUTES } from '../utils/routes';
+import { deleteTourRequest, getToursRequest, resolveTourImageUrl } from '../services/toursService';
+import { getEditTourRoute, ROUTES } from '../utils/routes';
 import { formatCurrencyVnd } from '../../shared/utils/formatters';
 
 function formatCount(value) {
@@ -66,6 +67,8 @@ function mapApiTourToRow(tour) {
 }
 
 export default function ToursPage() {
+  const navigate = useNavigate();
+  const { adminToken } = useAdminAuth();
   const [tourRows, setTourRows] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -73,6 +76,7 @@ export default function ToursPage() {
   const [loadError, setLoadError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState({ total: 0, totalPages: 1, hasNextPage: false, hasPrevPage: false });
+  const [deletingTourId, setDeletingTourId] = useState(null);
   // Dùng ref để debounce search, tránh gọi API liên tục khi gõ
   const debounceTimer = useRef(null);
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -140,6 +144,35 @@ export default function ToursPage() {
   }, [currentPage, debouncedSearch, selectedStatus]);
 
   const visibleTours = tourRows;
+
+  const handleDeleteTour = async (tour) => {
+    if (!adminToken) {
+      setLoadError('Phien dang nhap admin da het. Hay dang nhap lai.');
+      return;
+    }
+
+    const shouldDelete = window.confirm(`Xoa tour "${tour.name}"?`);
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    setDeletingTourId(tour.id);
+    setLoadError('');
+
+    try {
+      await deleteTourRequest(tour.id, adminToken);
+      setTourRows((currentRows) => currentRows.filter((item) => item.id !== tour.id));
+      setPagination((currentPagination) => ({
+        ...currentPagination,
+        total: Math.max(0, currentPagination.total - 1),
+      }));
+    } catch (error) {
+      setLoadError(error.message || 'Khong the xoa tour luc nay.');
+    } finally {
+      setDeletingTourId(null);
+    }
+  };
 
   const tourSummaryCards = toursPage.summaryCards.map((card) => {
     if (card.id === 'total') {
@@ -304,8 +337,18 @@ export default function ToursPage() {
                 </td>
                 <td className="px-8 py-4 text-right">
                   <div className="flex items-center justify-end gap-2">
-                    <IconButton icon="edit" variant="clean" className="hover:bg-white" />
-                    <IconButton icon="delete" variant="danger" />
+                    <IconButton
+                      icon="edit"
+                      variant="clean"
+                      className="hover:bg-white"
+                      onClick={() => navigate(getEditTourRoute(tour.id))}
+                    />
+                    <IconButton
+                      icon="delete"
+                      variant="danger"
+                      disabled={deletingTourId === tour.id}
+                      onClick={() => handleDeleteTour(tour)}
+                    />
                   </div>
                 </td>
               </tr>

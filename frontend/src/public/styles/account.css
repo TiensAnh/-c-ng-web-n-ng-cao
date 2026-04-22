@@ -1,0 +1,191 @@
+.account-page__layout {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.9fr);
+}
+
+.account-page__list-panel,
+.account-page__detail-panel,
+.account-page__empty {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 32px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+  padding: 2rem;
+}
+
+.account-page__section-head h1,
+.account-page__empty h1 {
+  margin: 0.35rem 0 0.75rem;
+  font-size: clamp(2rem, 3vw, 3rem);
+}
+
+.account-page__section-head p,
+.account-page__empty p,
+.account-page__detail-panel > p,
+.account-page__detail-card > p {
+  color: #516074;
+  line-height: 1.6;
+}
+
+.account-page__eyebrow {
+  color: #0f766e;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.account-page__message {
+  border-radius: 18px;
+  margin-top: 1rem;
+  padding: 0.9rem 1rem;
+}
+
+.account-page__message--error {
+  background: #fff1f2;
+  color: #be123c;
+}
+
+.account-page__message--success {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.account-page__booking-list {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.account-page__booking-card {
+  background: linear-gradient(135deg, rgba(244, 247, 251, 0.9), rgba(255, 255, 255, 0.96));
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 24px;
+  padding: 1.25rem;
+}
+
+.account-page__booking-card--active {
+  border-color: rgba(15, 118, 110, 0.32);
+  box-shadow: 0 16px 40px rgba(15, 118, 110, 0.12);
+}
+
+.account-page__booking-meta,
+.account-page__booking-actions,
+.account-page__payment-row {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.account-page__booking-meta h2,
+.account-page__detail-card h2 {
+  margin: 0.35rem 0 0;
+}
+
+.account-page__booking-id {
+  color: #0f766e;
+  font-size: 0.86rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.account-page__status {
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.45rem 0.8rem;
+}
+
+.account-page__status--success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.account-page__status--pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.account-page__status--cancelled {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.account-page__booking-grid,
+.account-page__detail-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 1.25rem 0;
+}
+
+.account-page__booking-grid span,
+.account-page__detail-grid dt {
+  color: #64748b;
+  display: block;
+  font-size: 0.78rem;
+  margin-bottom: 0.35rem;
+}
+
+.account-page__booking-grid strong,
+.account-page__detail-grid dd {
+  color: #0f172a;
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.account-page__detail-card,
+.account-page__detail-empty,
+.account-page__empty-card,
+.account-page__payment-box {
+  background: #f8fafc;
+  border-radius: 24px;
+  padding: 1.25rem;
+}
+
+.account-page__detail-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.account-page__payment-box {
+  margin-top: 1rem;
+}
+
+.account-page__payment-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  margin: 0 0 1rem;
+  text-transform: uppercase;
+}
+
+@media (max-width: 960px) {
+  .account-page__layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .account-page__list-panel,
+  .account-page__detail-panel,
+  .account-page__empty {
+    border-radius: 24px;
+    padding: 1.2rem;
+  }
+
+  .account-page__booking-grid,
+  .account-page__detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .account-page__booking-meta,
+  .account-page__booking-actions,
+  .account-page__payment-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

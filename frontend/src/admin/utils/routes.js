@@ -4,11 +4,16 @@ export const ROUTES = {
   dashboard: '/admin/dashboard',
   tours: '/admin/tours',
   newTour: '/admin/tours/new',
+  editTourPattern: '/admin/tours/:tourId/edit',
   bookings: '/admin/bookings',
   users: '/admin/users',
   reviews: '/admin/reviews',
   payments: '/admin/payments',
 };
+
+export function getEditTourRoute(tourId) {
+  return `/admin/tours/${tourId}/edit`;
+}
 
 export const NAV_ITEMS = [
   { key: "dashboard", label: "Dashboard", path: ROUTES.dashboard, icon: "dashboard" },

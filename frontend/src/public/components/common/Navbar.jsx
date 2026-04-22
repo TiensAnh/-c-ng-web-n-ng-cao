@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import brandLogo from '../../../shared/assets/images/Logo.png';
 import AuthModal from '../../../shared/components/AuthModal';
 import Button from '../../../shared/components/Button';
@@ -8,6 +8,7 @@ import { classNames } from '../../../shared/utils/classNames';
 import { navigationLinks } from '../../services/siteContentService';
 
 function Navbar() {
+  const navigate = useNavigate();
   const { isAuthenticated, logout, user } = useAuth();
   const [authMode, setAuthMode] = useState(null);
   const displayName = user?.name?.trim() || 'Nguoi dung';
@@ -66,6 +67,10 @@ function Navbar() {
                     <strong className="site-navbar__user-name">{displayName}</strong>
                   </div>
                 </div>
+
+                <Button className="site-navbar__support" variant="ghost" onClick={() => navigate('/my-bookings')}>
+                  Booking cua toi
+                </Button>
 
                 <Button className="site-navbar__auth-trigger" variant="secondary" onClick={logout}>
                   Dang xuat

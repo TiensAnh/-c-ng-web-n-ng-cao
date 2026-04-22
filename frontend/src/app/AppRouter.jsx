@@ -6,6 +6,7 @@ import ToursPage from '../public/pages/ToursPage';
 import TourDetailPage from '../public/pages/TourDetailPage';
 import AboutPage from '../public/pages/AboutPage';
 import ContactPage from '../public/pages/ContactPage';
+import MyBookingsPage from '../public/pages/MyBookingsPage';
 import AdminProtectedRoute from '../admin/components/AdminProtectedRoute';
 
 const AdminApp = lazy(() => import('../admin/AdminApp'));
@@ -27,6 +28,7 @@ function AppRouter() {
         <Route path="tours/:tourId" element={<TourDetailPage />} />
         <Route path="about" element={<AboutPage />} />
         <Route path="contact" element={<ContactPage />} />
+        <Route path="my-bookings" element={<MyBookingsPage />} />
       </Route>
 
       <Route
@@ -59,6 +61,7 @@ function AppRouter() {
         <Route index element={<Navigate replace to="dashboard" />} />
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="tours/new" element={<TourCreatePage />} />
+        <Route path="tours/:tourId/edit" element={<TourCreatePage />} />
         <Route path="tours" element={<ToursAdminPage />} />
         <Route path="bookings" element={<BookingsPage />} />
         <Route path="users" element={<UsersPage />} />

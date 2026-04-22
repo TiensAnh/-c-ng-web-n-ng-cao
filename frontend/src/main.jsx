@@ -15,6 +15,7 @@ import './public/styles/home.css';
 import './public/styles/tours.css';
 import './public/styles/about.css';
 import './public/styles/contact.css';
+import './public/styles/account.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

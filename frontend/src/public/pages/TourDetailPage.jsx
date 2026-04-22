@@ -1,9 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Button from '../../shared/components/Button';
 import TourExperienceLayout from '../../shared/components/TourExperienceLayout';
 import usePageTitle from '../../shared/hooks/usePageTitle';
+import { useAuth } from '../../shared/context/AuthContext';
 import { formatCurrencyVnd } from '../../shared/utils/formatters';
+import {
+  createBookingRequest,
+  createPaymentRequest,
+} from '../services/bookingApiService';
 import {
   getPublicTourByIdRequest,
   mapApiTourToDetail,
@@ -34,12 +39,24 @@ function getTransportIcon(transport = '') {
   return 'groups';
 }
 
+const INITIAL_BOOKING_FORM = {
+  travelDate: '',
+  numberOfPeople: '1',
+  paymentTiming: 'LATER',
+  paymentMethod: 'MOMO',
+};
+
 export default function TourDetailPage() {
   const navigate = useNavigate();
   const { tourId } = useParams();
+  const { isAuthenticated, token } = useAuth();
   const [tour, setTour] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
+  const [bookingForm, setBookingForm] = useState(INITIAL_BOOKING_FORM);
+  const [bookingMessage, setBookingMessage] = useState('');
+  const [bookingError, setBookingError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -57,7 +74,7 @@ export default function TourDetailPage() {
 
         if (!response.tour || response.tour.status !== 'Active') {
           setTour(null);
-          setLoadError('Tour này hiện không khả dụng trên trang công khai.');
+          setLoadError('Tour nay hien khong kha dung tren trang cong khai.');
           return;
         }
 
@@ -68,7 +85,7 @@ export default function TourDetailPage() {
         }
 
         setTour(null);
-        setLoadError(error.message || 'Không thể tải chi tiết tour lúc này.');
+        setLoadError(error.message || 'Khong the tai chi tiet tour luc nay.');
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -85,19 +102,84 @@ export default function TourDetailPage() {
 
   usePageTitle(
     isLoading
-      ? 'ADN Travel | Đang tải tour'
+      ? 'ADN Travel | Dang tai tour'
       : tour
         ? `ADN Travel | ${tour.title}`
-        : 'ADN Travel | Không tìm thấy tour',
+        : 'ADN Travel | Khong tim thay tour',
   );
+
+  const totalEstimate = useMemo(() => {
+    const people = Math.max(Number(bookingForm.numberOfPeople || 1), 1);
+    return Number(tour?.price || 0) * people;
+  }, [bookingForm.numberOfPeople, tour?.price]);
+
+  const handleBookingFieldChange = (field) => (event) => {
+    setBookingForm((currentForm) => ({
+      ...currentForm,
+      [field]: event.target.value,
+    }));
+  };
+
+  const handleBookingSubmit = async (event) => {
+    event.preventDefault();
+    setBookingError('');
+    setBookingMessage('');
+
+    if (!isAuthenticated || !token) {
+      setBookingError('Ban can dang nhap truoc khi dat tour.');
+      return;
+    }
+
+    if (!bookingForm.travelDate) {
+      setBookingError('Vui long chon ngay khoi hanh.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const bookingResponse = await createBookingRequest({
+        tour_id: tour.id,
+        travel_date: bookingForm.travelDate,
+        number_of_people: Number(bookingForm.numberOfPeople),
+      }, token);
+
+      const bookingId = bookingResponse.booking?.id;
+
+      if (!bookingId) {
+        throw new Error('Booking da tao nhung khong nhan duoc ma booking.');
+      }
+
+      if (bookingForm.paymentTiming === 'NOW') {
+        const paymentResponse = await createPaymentRequest({
+          booking_id: bookingId,
+          method: bookingForm.paymentMethod,
+        }, token);
+
+        setBookingMessage(
+          `${bookingResponse.message || 'Dat tour thanh cong.'} ${paymentResponse.message || 'Thanh toan thanh cong.'}`,
+        );
+      } else {
+        setBookingMessage(
+          `${bookingResponse.message || 'Dat tour thanh cong.'} Ban co the thanh toan sau trong muc Booking cua toi.`,
+        );
+      }
+
+      setBookingForm(INITIAL_BOOKING_FORM);
+    } catch (submitError) {
+      setBookingError(submitError.message || 'Khong the hoan tat dat tour luc nay.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (isLoading) {
     return (
       <section className="tour-spotlight">
         <div className="tour-spotlight__empty">
-          <p className="tour-spotlight__eyebrow">Chi tiết tour</p>
-          <h1>Đang tải dữ liệu tour</h1>
-          <p>ADN Travel đang lấy thông tin hành trình mới nhất từ hệ thống.</p>
+          <p className="tour-spotlight__eyebrow">Chi tiet tour</p>
+          <h1>Dang tai du lieu tour</h1>
+          <p>ADN Travel dang lay thong tin hanh trinh moi nhat tu he thong.</p>
         </div>
       </section>
     );
@@ -107,13 +189,13 @@ export default function TourDetailPage() {
     return (
       <section className="tour-spotlight">
         <div className="tour-spotlight__empty">
-          <p className="tour-spotlight__eyebrow">Chi tiết tour</p>
-          <h1>Không tìm thấy tour này</h1>
+          <p className="tour-spotlight__eyebrow">Chi tiet tour</p>
+          <h1>Khong tim thay tour nay</h1>
           <p>
-            {loadError || 'Có thể tour đã được ẩn, xoá hoặc đường dẫn chưa đúng. Bạn có thể quay lại danh sách tour để chọn một hành trình khác.'}
+            {loadError || 'Co the tour da duoc an, xoa hoac duong dan chua dung. Ban co the quay lai danh sach tour de chon mot hanh trinh khac.'}
           </p>
           <div className="tour-spotlight__hero-actions" style={{ justifyContent: 'center' }}>
-            <Button onClick={() => navigate('/tours')}>Quay lại danh sách tour</Button>
+            <Button onClick={() => navigate('/tours')}>Quay lai danh sach tour</Button>
           </div>
         </div>
       </section>
@@ -128,10 +210,10 @@ export default function TourDetailPage() {
   ].filter(Boolean);
 
   const stats = [
-    { label: 'Giá từ', value: `${formatCurrencyVnd(tour.price)}đ`, helper: 'mỗi khách' },
-    tour.rating ? { label: 'Đánh giá', value: `${tour.rating}`, helper: `${tour.reviews} đánh giá` } : null,
-    tour.season ? { label: 'Mùa đẹp', value: tour.season, helper: 'thời điểm gợi ý' } : null,
-    tour.departureNote ? { label: 'Khởi hành', value: tour.departureNote, helper: 'lịch gần nhất' } : null,
+    { label: 'Gia tu', value: `${formatCurrencyVnd(tour.price)}d`, helper: 'moi khach' },
+    tour.rating ? { label: 'Danh gia', value: `${tour.rating}`, helper: `${tour.reviews} danh gia` } : null,
+    tour.season ? { label: 'Mua dep', value: tour.season, helper: 'thoi diem goi y' } : null,
+    tour.departureNote ? { label: 'Khoi hanh', value: tour.departureNote, helper: 'lich gan nhat' } : null,
   ].filter(Boolean);
 
   const overviewCards = tour.includedItems.length
@@ -139,7 +221,7 @@ export default function TourDetailPage() {
         ...tour.overviewCards,
         {
           icon: 'inventory_2',
-          title: 'Bao gồm trong gói',
+          title: 'Bao gom trong goi',
           items: tour.includedItems,
         },
       ]
@@ -147,60 +229,78 @@ export default function TourDetailPage() {
 
   const aside = (
     <div className="tour-spotlight__panel tour-spotlight__panel--accent">
-      <p className="tour-spotlight__panel-eyebrow">Sẵn sàng đặt chỗ</p>
-      <h2 className="tour-spotlight__panel-title">Giữ chỗ của bạn trong hành trình này</h2>
+      <p className="tour-spotlight__panel-eyebrow">San sang dat cho</p>
+      <h2 className="tour-spotlight__panel-title">Dat tour linh hoat</h2>
       <p className="tour-spotlight__panel-copy">
-        ADN Travel sẽ gọi lại để chốt lịch khởi hành, nhu cầu phòng và các ưu tiên riêng của bạn ngay sau khi nhận yêu cầu.
+        Chon ngay di, so luong khach va quyet dinh thanh toan ngay hoac de sau. Booking se duoc tao truoc, sau do ban co the quay lai thanh toan bat ky luc nao.
       </p>
 
       <div className="tour-spotlight__panel-price">
         <div>
-          <span>Giá tham khảo</span>
-          <strong>{formatCurrencyVnd(tour.price)}đ</strong>
+          <span>Gia tam tinh</span>
+          <strong>{formatCurrencyVnd(totalEstimate)}d</strong>
         </div>
         {tour.badge ? <em>{tour.badge}</em> : null}
       </div>
 
-      <dl className="tour-spotlight__panel-meta">
-        {tour.departureSchedule ? (
-          <div>
-            <dt>Khởi hành</dt>
-            <dd>{tour.departureSchedule}</dd>
+      <form className="tour-booking-form" onSubmit={handleBookingSubmit}>
+        <label className="tour-booking-form__field">
+          <span>Ngay khoi hanh</span>
+          <input type="date" value={bookingForm.travelDate} onChange={handleBookingFieldChange('travelDate')} required />
+        </label>
+
+        <label className="tour-booking-form__field">
+          <span>So luong khach</span>
+          <input
+            type="number"
+            min="1"
+            max={tour.maxPeople || 20}
+            value={bookingForm.numberOfPeople}
+            onChange={handleBookingFieldChange('numberOfPeople')}
+            required
+          />
+        </label>
+
+        <label className="tour-booking-form__field">
+          <span>Lua chon thanh toan</span>
+          <select value={bookingForm.paymentTiming} onChange={handleBookingFieldChange('paymentTiming')}>
+            <option value="LATER">Dat truoc, thanh toan sau</option>
+            <option value="NOW">Dat va thanh toan ngay</option>
+          </select>
+        </label>
+
+        <label className="tour-booking-form__field">
+          <span>Thanh toan</span>
+          <select
+            value={bookingForm.paymentMethod}
+            onChange={handleBookingFieldChange('paymentMethod')}
+            disabled={bookingForm.paymentTiming !== 'NOW'}
+          >
+            <option value="MOMO">MoMo</option>
+            <option value="BANK_TRANSFER">Chuyen khoan</option>
+            <option value="VNPAY">VNPay</option>
+            <option value="CASH">Tien mat</option>
+          </select>
+        </label>
+
+        {!isAuthenticated ? (
+          <div className="tour-booking-form__hint">
+            Ban can dang nhap truoc khi dat tour. Sau khi dang nhap, quay lai trang nay de tiep tuc.
           </div>
         ) : null}
-        {tour.meetingPoint ? (
-          <div>
-            <dt>Điểm đón</dt>
-            <dd>{tour.meetingPoint}</dd>
-          </div>
-        ) : null}
-        {tour.groupSize ? (
-          <div>
-            <dt>Nhóm tối đa</dt>
-            <dd>{tour.groupSize}</dd>
-          </div>
-        ) : null}
-      </dl>
 
-      {tour.promiseItems.length ? <div className="tour-spotlight__panel-divider" /> : null}
+        {bookingError ? <div className="tour-booking-form__message tour-booking-form__message--error">{bookingError}</div> : null}
+        {bookingMessage ? <div className="tour-booking-form__message tour-booking-form__message--success">{bookingMessage}</div> : null}
 
-      {tour.promiseItems.length ? (
-        <>
-          <p className="tour-spotlight__panel-eyebrow">Cam kết trải nghiệm</p>
-          <ul className="tour-spotlight__panel-list">
-            {tour.promiseItems.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </>
-      ) : null}
-
-      <div className="tour-spotlight__panel-actions">
-        <Button onClick={() => navigate('/contact')}>Đặt lịch tư vấn</Button>
-        <Button variant="secondary" onClick={() => navigate('/tours')}>
-          Quay lại danh sách
-        </Button>
-      </div>
+        <div className="tour-spotlight__panel-actions">
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Dang xu ly...' : bookingForm.paymentTiming === 'NOW' ? 'Dat va thanh toan' : 'Dat tour truoc'}
+          </Button>
+          <Button variant="secondary" onClick={() => navigate('/my-bookings')}>
+            Xem booking cua toi
+          </Button>
+        </div>
+      </form>
     </div>
   );
 
@@ -209,9 +309,9 @@ export default function TourDetailPage() {
       actions={(
         <>
           <Button variant="secondary" onClick={() => navigate('/tours')}>
-            Tất cả tour
+            Tat ca tour
           </Button>
-          <Button onClick={() => navigate('/contact')}>Hỏi lịch trình này</Button>
+          <Button onClick={() => navigate('/my-bookings')}>Booking cua toi</Button>
         </>
       )}
       aside={aside}
@@ -221,13 +321,13 @@ export default function TourDetailPage() {
       heroAlt={tour.imageAlt}
       heroImage={tour.image}
       highlights={tour.highlights}
-      highlightsTitle="Lý do hành trình này được chọn nhiều"
+      highlightsTitle="Ly do hanh trinh nay duoc chon nhieu"
       itinerary={tour.itinerary}
-      itineraryTitle="Nhịp trải nghiệm theo từng ngày"
+      itineraryTitle="Nhip trai nghiem theo tung ngay"
       meta={meta}
       overviewCards={overviewCards}
-      overviewDescription="Toàn bộ nội dung trang này đang được lấy theo dữ liệu tour trong hệ thống quản trị."
-      overviewTitle="Chân dung của chuyến đi"
+      overviewDescription="Toan bo noi dung trang nay dang duoc lay theo du lieu tour trong he thong quan tri."
+      overviewTitle="Chan dung cua chuyen di"
       quote={tour.curatorNote}
       quoteAuthor={tour.curatorName}
       stats={stats}

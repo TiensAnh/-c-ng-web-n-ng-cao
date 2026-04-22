@@ -292,8 +292,17 @@ export function mapApiTourToDetail(tour) {
   };
 }
 
-export function getPublicToursRequest() {
-  return request('/tours', {
+export function getPublicToursRequest(params = {}) {
+  const query = new URLSearchParams();
+
+  if (params.page) query.set('page', params.page);
+  if (params.limit) query.set('limit', params.limit);
+  if (params.status) query.set('status', params.status);
+  if (params.search) query.set('search', params.search);
+
+  const queryString = query.toString();
+
+  return request(`/tours${queryString ? `?${queryString}` : ''}`, {
     method: 'GET',
   });
 }

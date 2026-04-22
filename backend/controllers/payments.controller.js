@@ -108,3 +108,51 @@ exports.getPaymentsByBookingId = async (req, res) => {
     return res.status(500).json({ message: 'Khong the lay lich su thanh toan.', error: error.message });
   }
 };
+
+// GET /api/payments
+// Admin xem danh sach tat ca giao dich
+exports.getAllPayments = async (req, res) => {
+  const { status, method } = req.query;
+
+  try {
+    const whereClauses = [];
+    const params = [];
+
+    if (status) {
+      whereClauses.push('p.status = ?');
+      params.push(String(status).toUpperCase());
+    }
+
+    if (method) {
+      whereClauses.push('p.method = ?');
+      params.push(String(method).toUpperCase());
+    }
+
+    const whereSql = whereClauses.length ? `WHERE ${whereClauses.join(' AND ')}` : '';
+
+    const [rows] = await db.query(
+      `SELECT p.*,
+              b.user_id, b.total_price, b.status AS booking_status,
+              u.name AS user_name, u.email AS user_email,
+              t.title AS tour_title
+       FROM payments p
+       JOIN bookings b ON b.id = p.booking_id
+       JOIN users u ON u.id = b.user_id
+       JOIN tours t ON t.id = b.tour_id
+       ${whereSql}
+       ORDER BY p.paid_at DESC, p.id DESC`,
+      params,
+    );
+
+    return res.status(200).json({
+      message: 'Lay danh sach giao dich thanh cong.',
+      total: rows.length,
+      payments: rows,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Khong the lay danh sach giao dich.',
+      error: error.message,
+    });
+  }
+};
