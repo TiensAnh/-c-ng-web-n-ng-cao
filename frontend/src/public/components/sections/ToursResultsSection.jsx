@@ -1,7 +1,7 @@
 import TourCard from '../cards/TourCard';
 import { formatTourCount } from '../../../shared/utils/formatters';
 
-function ToursResultsSection({ filteredTours, sortBy, setSortBy }) {
+function ToursResultsSection({ filteredTours, loadError = '', isLoading = false, sortBy, setSortBy }) {
   return (
     <section className="tours-results">
       <div className="tours-results__header">
@@ -23,33 +23,33 @@ function ToursResultsSection({ filteredTours, sortBy, setSortBy }) {
         </label>
       </div>
 
-      <div className="tours-results__grid">
-        {filteredTours.map((tour) => (
-          <TourCard key={tour.id} tour={tour} />
-        ))}
-      </div>
+      {isLoading ? (
+        <div className="surface-card rounded-[2rem] px-6 py-10 text-center text-sm text-slate-500">
+          Đang tải danh sách tour...
+        </div>
+      ) : loadError ? (
+        <div className="surface-card rounded-[2rem] px-6 py-10 text-center text-sm text-rose-500">
+          {loadError}
+        </div>
+      ) : filteredTours.length ? (
+        <div className="tours-results__grid">
+          {filteredTours.map((tour) => (
+            <TourCard key={tour.id} tour={tour} />
+          ))}
+        </div>
+      ) : (
+        <div className="surface-card rounded-[2rem] px-6 py-10 text-center text-sm text-slate-500">
+          Chưa có tour phù hợp với bộ lọc hiện tại.
+        </div>
+      )}
 
-      <div className="pagination">
-        <button type="button">
-          <span className="material-symbols-outlined">chevron_left</span>
-        </button>
-        <button type="button" className="pagination__item pagination__item--active">
-          1
-        </button>
-        <button type="button" className="pagination__item">
-          2
-        </button>
-        <button type="button" className="pagination__item">
-          3
-        </button>
-        <span className="pagination__dots">...</span>
-        <button type="button" className="pagination__item">
-          12
-        </button>
-        <button type="button">
-          <span className="material-symbols-outlined">chevron_right</span>
-        </button>
-      </div>
+      {filteredTours.length ? (
+        <div className="pagination">
+          <button type="button" className="pagination__item pagination__item--active">
+            1
+          </button>
+        </div>
+      ) : null}
     </section>
   );
 }

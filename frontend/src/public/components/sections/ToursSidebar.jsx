@@ -1,10 +1,12 @@
-import { toursContent } from '../../services/siteContentService';
-
 function ToursSidebar({
   clearDestinations,
+  destinations,
+  durationOptions,
   isShowingAll,
+  maxPriceRange,
   priceRange,
   resetFilters,
+  ratingOptions,
   searchText,
   selectedDestinations,
   selectedDuration,
@@ -13,6 +15,7 @@ function ToursSidebar({
   setSearchText,
   setSelectedDuration,
   setSelectedRating,
+  sidebarPromo,
   toggleDestination,
 }) {
   return (
@@ -50,7 +53,7 @@ function ToursSidebar({
               />
               <span>Tất cả</span>
             </label>
-            {toursContent.destinations.map((destination) => (
+            {destinations.map((destination) => (
               <label key={destination} className="checkbox-row">
                 <input
                   type="checkbox"
@@ -67,14 +70,14 @@ function ToursSidebar({
           <span className="tours-sidebar__label">Mức giá (VNĐ)</span>
           <input
             type="range"
-            min="1000000"
-            max="20000000"
+            min="0"
+            max={maxPriceRange}
             step="500000"
             value={priceRange}
             onChange={(event) => setPriceRange(Number(event.target.value))}
           />
           <div className="tours-sidebar__range">
-            <span>1.000.000đ</span>
+            <span>0đ</span>
             <span>{priceRange.toLocaleString('vi-VN')}đ</span>
           </div>
         </div>
@@ -89,7 +92,7 @@ function ToursSidebar({
             >
               Tất cả
             </button>
-            {toursContent.durationOptions.map((option) => (
+            {durationOptions.map((option) => (
               <button
                 key={option}
                 type="button"
@@ -105,7 +108,7 @@ function ToursSidebar({
         <div className="tours-sidebar__group">
           <span className="tours-sidebar__label">Đánh giá</span>
           <div className="tours-sidebar__stack">
-            {toursContent.ratingOptions.map((option) => (
+            {ratingOptions.map((option) => (
               <label key={option.value} className="radio-row">
                 <input
                   type="radio"
@@ -127,16 +130,24 @@ function ToursSidebar({
             </label>
           </div>
         </div>
+
+        {!isShowingAll ? (
+          <button type="button" className="filter-chip filter-chip--active" onClick={resetFilters}>
+            Đặt lại bộ lọc
+          </button>
+        ) : null}
       </div>
 
-      <article className="tours-sidebar__promo">
-        <img src={toursContent.sidebarPromo.image} alt={toursContent.sidebarPromo.title} />
-        <div className="tours-sidebar__promo-overlay">
-          <span className="promo-chip">Ưu đãi độc quyền</span>
-          <h3>{toursContent.sidebarPromo.title}</h3>
-          <p>{toursContent.sidebarPromo.description}</p>
-        </div>
-      </article>
+      {sidebarPromo ? (
+        <article className="tours-sidebar__promo">
+          <img src={sidebarPromo.image} alt={sidebarPromo.title} />
+          <div className="tours-sidebar__promo-overlay">
+            <span className="promo-chip">Ưu đãi độc quyền</span>
+            <h3>{sidebarPromo.title}</h3>
+            <p>{sidebarPromo.description}</p>
+          </div>
+        </article>
+      ) : null}
     </aside>
   );
 }

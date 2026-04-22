@@ -1,49 +1,144 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { images } from '../assets';
 import Button from '../components/Button';
 import HeroSection from '../components/HeroSection';
+import { useAdminAuth } from '../context/AdminAuthContext';
 import useDocumentTitle from '../hooks/useDocumentTitle';
+import { createTourRequest } from '../services/toursService';
 import { ROUTES } from '../utils/routes';
-import TourExperienceLayout from '../../shared/components/TourExperienceLayout';
 import { formatCurrencyVnd } from '../../shared/utils/formatters';
 
 const DEFAULT_IMAGE = images.tourHaLong;
+const OVERVIEW_ICONS = ['bed', 'explore', 'restaurant'];
+const HIGHLIGHT_ICONS = ['landscape', 'beach_access', 'nightlife', 'photo_camera', 'hiking'];
+const BADGE_OPTIONS = ['', 'Bán chạy', 'Mới', 'Khám phá', 'Tinh tuyển', 'Ưu đãi', 'Giảm giá'];
 
-const INITIAL_FORM = {
+const EMPTY_FORM = {
   name: '',
+  eyebrow: '',
+  badge: '',
+  description: '',
   location: '',
   duration: '',
-  price: '',
-  status: 'Draft',
-  transport: '',
   groupSize: '',
-  departure: '',
-  tagline: '',
-  description: '',
-  includes: '',
-  highlights: '',
-  dayOne: '',
-  dayTwo: '',
-  dayThree: '',
+  transport: '',
+  status: 'Draft',
+  price: '',
+  rating: '',
+  reviews: '',
+  season: '',
+  departureNote: '',
+  departureSchedule: '',
+  meetingPoint: '',
+  curatorNote: '',
+  curatorName: '',
+  includedItems: [''],
+  promiseItems: [''],
+  overviewCards: [
+    { title: '', description: '' },
+    { title: '', description: '' },
+    { title: '', description: '' },
+  ],
+  highlights: [
+    { title: '', description: '' },
+  ],
+  itinerary: [
+    { label: 'Ngày 1', title: '', description: '' },
+  ],
 };
 
-function buildList(value, fallbackItems) {
-  const items = value
-    .split('\n')
-    .map((item) => item.trim())
-    .filter(Boolean);
+const panelInputClass =
+  'w-full rounded-2xl border border-transparent bg-slate-50/80 px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-primary/25 focus:ring-2 focus:ring-primary/10';
+const inlineInputClass =
+  'w-full border-none bg-transparent p-0 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:outline-none';
+const headingInputClass =
+  'w-full border-none bg-transparent p-0 font-headline text-[clamp(2.2rem,5vw,4.2rem)] font-extrabold leading-[1.02] tracking-[-0.05em] text-on-surface outline-none placeholder:text-slate-300';
+const quoteTextareaClass =
+  'w-full min-h-[140px] resize-none border-none bg-transparent p-0 text-[1.05rem] leading-8 text-slate-700 outline-none placeholder:text-slate-400 focus:outline-none';
+const richTextareaClass =
+  'w-full min-h-[120px] resize-none rounded-2xl border border-transparent bg-slate-50/80 px-4 py-4 text-sm leading-7 text-slate-600 outline-none transition placeholder:text-slate-400 focus:border-primary/25 focus:ring-2 focus:ring-primary/10';
+const compactTextareaClass =
+  'w-full min-h-[96px] resize-none rounded-2xl border border-transparent bg-slate-50/80 px-4 py-4 text-sm leading-7 text-slate-600 outline-none transition placeholder:text-slate-400 focus:border-primary/25 focus:ring-2 focus:ring-primary/10';
+const ghostTextareaClass =
+  'w-full resize-none border-none bg-transparent p-0 text-sm leading-7 text-slate-600 outline-none placeholder:text-slate-400 focus:outline-none';
+const cardTextareaClass =
+  'mt-3 w-full min-h-[110px] resize-none border-none bg-transparent p-0 text-sm leading-7 text-slate-600 outline-none placeholder:text-slate-400 focus:outline-none';
+const pillInputClass =
+  'min-w-[120px] border-none bg-transparent p-0 text-[0.78rem] font-bold uppercase tracking-[0.08em] outline-none placeholder:text-current';
+const pillSelectClass =
+  'min-w-[140px] cursor-pointer appearance-none border-none bg-transparent p-0 pr-6 text-[0.78rem] font-bold uppercase tracking-[0.08em] outline-none';
 
-  return items.length ? items : fallbackItems;
+function createEmptyOverviewCard() {
+  return { title: '', description: '' };
+}
+
+function createEmptyHighlight(index) {
+  return {
+    title: '',
+    description: '',
+    icon: HIGHLIGHT_ICONS[index % HIGHLIGHT_ICONS.length],
+  };
+}
+
+function createEmptyItinerary(index) {
+  return {
+    label: `Ngày ${index + 1}`,
+    title: '',
+    description: '',
+  };
+}
+
+function ensureOverviewCards(cards = []) {
+  return Array.from({ length: 3 }, (_, index) => ({
+    ...createEmptyOverviewCard(),
+    ...cards[index],
+  }));
+}
+
+function ensureHighlights(items = []) {
+  if (!items.length) {
+    return [createEmptyHighlight(0)];
+  }
+
+  return items.map((item, index) => ({
+    ...createEmptyHighlight(index),
+    ...item,
+  }));
+}
+
+function ensureItinerary(items = []) {
+  if (!items.length) {
+    return [createEmptyItinerary(0)];
+  }
+
+  return items.map((item, index) => ({
+    ...createEmptyItinerary(index),
+    ...item,
+    label: item.label || `Ngày ${index + 1}`,
+  }));
+}
+
+function normalizeArray(items) {
+  return Array.isArray(items) ? items : [];
 }
 
 export default function TourCreatePage() {
-  const [formValues, setFormValues] = useState(INITIAL_FORM);
+  const navigate = useNavigate();
+  const { adminToken } = useAdminAuth();
+  const [formValues, setFormValues] = useState({
+    ...EMPTY_FORM,
+    overviewCards: ensureOverviewCards(EMPTY_FORM.overviewCards),
+    highlights: ensureHighlights(EMPTY_FORM.highlights),
+    itinerary: ensureItinerary(EMPTY_FORM.itinerary),
+  });
   const [imagePreview, setImagePreview] = useState(DEFAULT_IMAGE);
-  const [uploadLabel, setUploadLabel] = useState('Chua co anh moi');
+  const [selectedImageFile, setSelectedImageFile] = useState(null);
+  const [uploadLabel, setUploadLabel] = useState('Đang dùng ảnh mẫu hệ thống');
+  const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState('');
 
-  useDocumentTitle('Create Tour | The Horizon Admin');
+  useDocumentTitle('Tạo tour mới | ADN Travel Admin');
 
   useEffect(() => {
     return () => {
@@ -61,6 +156,114 @@ export default function TourCreatePage() {
     setSaveMessage('');
   };
 
+  const handleOverviewCardChange = (index, field) => (event) => {
+    const nextValue = event.target.value;
+
+    setFormValues((currentValues) => ({
+      ...currentValues,
+      overviewCards: currentValues.overviewCards.map((card, cardIndex) => (
+        cardIndex === index ? { ...card, [field]: nextValue } : card
+      )),
+    }));
+    setSaveMessage('');
+  };
+
+  const handleStringArrayChange = (field, index) => (event) => {
+    const nextValue = event.target.value;
+
+    setFormValues((currentValues) => ({
+      ...currentValues,
+      [field]: currentValues[field].map((item, itemIndex) => (
+        itemIndex === index ? nextValue : item
+      )),
+    }));
+    setSaveMessage('');
+  };
+
+  const addStringArrayItem = (field) => () => {
+    setFormValues((currentValues) => ({
+      ...currentValues,
+      [field]: [...normalizeArray(currentValues[field]), ''],
+    }));
+    setSaveMessage('');
+  };
+
+  const removeStringArrayItem = (field, index) => () => {
+    setFormValues((currentValues) => {
+      const nextItems = currentValues[field].filter((_, itemIndex) => itemIndex !== index);
+
+      return {
+        ...currentValues,
+        [field]: nextItems.length ? nextItems : [''],
+      };
+    });
+    setSaveMessage('');
+  };
+
+  const handleHighlightChange = (index, field) => (event) => {
+    const nextValue = event.target.value;
+
+    setFormValues((currentValues) => ({
+      ...currentValues,
+      highlights: currentValues.highlights.map((item, itemIndex) => (
+        itemIndex === index ? { ...item, [field]: nextValue } : item
+      )),
+    }));
+    setSaveMessage('');
+  };
+
+  const addHighlight = () => {
+    setFormValues((currentValues) => ({
+      ...currentValues,
+      highlights: [...currentValues.highlights, createEmptyHighlight(currentValues.highlights.length)],
+    }));
+    setSaveMessage('');
+  };
+
+  const removeHighlight = (index) => () => {
+    setFormValues((currentValues) => {
+      const nextItems = currentValues.highlights.filter((_, itemIndex) => itemIndex !== index);
+
+      return {
+        ...currentValues,
+        highlights: ensureHighlights(nextItems),
+      };
+    });
+    setSaveMessage('');
+  };
+
+  const handleItineraryChange = (index, field) => (event) => {
+    const nextValue = event.target.value;
+
+    setFormValues((currentValues) => ({
+      ...currentValues,
+      itinerary: currentValues.itinerary.map((item, itemIndex) => (
+        itemIndex === index ? { ...item, [field]: nextValue } : item
+      )),
+    }));
+    setSaveMessage('');
+  };
+
+  const addItinerary = () => {
+    setFormValues((currentValues) => ({
+      ...currentValues,
+      itinerary: [...currentValues.itinerary, createEmptyItinerary(currentValues.itinerary.length)],
+    }));
+    setSaveMessage('');
+  };
+
+  const removeItinerary = (index) => () => {
+    setFormValues((currentValues) => {
+      const nextItems = currentValues.itinerary.filter((_, itemIndex) => itemIndex !== index);
+
+      return {
+        ...currentValues,
+        itinerary: ensureItinerary(nextItems),
+      };
+    });
+    setSaveMessage('');
+  };
+
   const handleImageChange = (event) => {
     const file = event.target.files?.[0];
 
@@ -75,354 +278,498 @@ export default function TourCreatePage() {
 
       return URL.createObjectURL(file);
     });
+    setSelectedImageFile(file);
     setUploadLabel(file.name);
     setSaveMessage('');
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    setSaveMessage('Ban nhap da duoc luu o giao dien preview. Ban co the noi API luu that o buoc tiep theo.');
+
+    if (!adminToken) {
+      setSaveMessage('Phiên đăng nhập admin đã hết. Bạn hãy đăng nhập lại để lưu tour.');
+      return;
+    }
+
+    const payload = {
+      name: formValues.name,
+      description: formValues.description,
+      location: formValues.location,
+      duration: formValues.duration,
+      price: formValues.price,
+      groupSize: formValues.groupSize,
+      status: formValues.status,
+      badge: formValues.badge,
+      transport: formValues.transport,
+      season: formValues.season,
+      departureNote: formValues.departureNote,
+      departureSchedule: formValues.departureSchedule,
+      meetingPoint: formValues.meetingPoint,
+      tagline: formValues.eyebrow,
+      curatorNote: formValues.curatorNote,
+      curatorName: formValues.curatorName,
+      includedItems: normalizeArray(formValues.includedItems).filter(Boolean),
+      promiseItems: normalizeArray(formValues.promiseItems).filter(Boolean),
+      overviewCards: normalizeArray(formValues.overviewCards).filter(
+        (item) => item?.title || item?.description,
+      ),
+      highlights: normalizeArray(formValues.highlights).filter(
+        (item) => item?.title || item?.description,
+      ),
+      itinerary: normalizeArray(formValues.itinerary).filter(
+        (item) => item?.title || item?.description,
+      ),
+      imageUrl: '',
+    };
+
+    setIsSaving(true);
+    setSaveMessage('');
+
+    try {
+      await createTourRequest(payload, adminToken, selectedImageFile);
+      navigate(ROUTES.tours);
+    } catch (error) {
+      setSaveMessage(error.message || 'Không thể lưu tour lúc này.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const previewName = formValues.name.trim() || 'Ten tour moi dang cho ban dat';
-  const previewLocation = formValues.location.trim() || 'Nhap khu vuc, thanh pho hoac cum diem den';
-  const previewDuration = formValues.duration.trim() || 'Nhap tong thoi gian hanh trinh';
-  const previewTransport = formValues.transport.trim() || 'Nhap cach di chuyen chinh';
-  const previewGroupSize = formValues.groupSize.trim() || 'Tinh chinh suc chua cho nhom khach';
-  const previewDeparture = formValues.departure.trim() || 'Them lich khoi hanh du kien';
-  const previewDescription =
-    formValues.description.trim() ||
-    'Phan mo ta nay la ban xem truoc cua detail tour. Khi nhap thong tin o cot ben phai, khung nay se doi theo.';
-  const previewTagline =
-    formValues.tagline.trim() || 'Them mot tagline ngan de dinh hinh chat rieng cua san pham moi.';
-  const previewPrice = formValues.price ? `${formatCurrencyVnd(Number(formValues.price))}d` : '0d';
-
-  const includedItems = buildList(formValues.includes, [
-    'Xe don tra hoac diem gap mat ro rang',
-    'Lich trinh duoc canh chinh theo nhom khach muc tieu',
-    'Cho cho phan upload anh va thong tin bo sung',
-  ]);
-
-  const highlightItems = buildList(formValues.highlights, [
-    'Nhap moi diem nhan tren mot dong de ben trai cap nhat ngay',
-    'Co the dung khu vuc nay de mo ta USP cua tour',
-    'Khi co API, phan nay co the map vao highlights trong database',
-  ]).map((item, index) => ({
-    icon: index === 0 ? 'photo_camera' : index === 1 ? 'star' : 'inventory_2',
-    title: `Diem nhan ${index + 1}`,
-    description: item,
-  }));
-
-  const itinerary = [
-    {
-      label: 'Buoc 1',
-      title: 'Mo dau hanh trinh',
-      description:
-        formValues.dayOne.trim() ||
-        'Mo ta ngay dau tien, noi don khach, su kien mo man hoac diem cham dau tien.',
-    },
-    {
-      label: 'Buoc 2',
-      title: 'Khoi cao trai nghiem',
-      description:
-        formValues.dayTwo.trim() ||
-        'Nhap hoat dong trung tam cua tour de xem block lich trinh cap nhat theo.',
-    },
-    {
-      label: 'Buoc 3',
-      title: 'Ket tour va gia tri de lai',
-      description:
-        formValues.dayThree.trim() ||
-        'Day la noi mo ta diem dong hanh trinh, qua tang, bua an hoac call-to-action tiep theo.',
-    },
-  ];
-
-  const aside = (
-    <div className="tour-spotlight__panel">
-      <p className="tour-spotlight__panel-eyebrow">Tour builder</p>
-      <h2 className="tour-spotlight__panel-title">Nhap thong tin va upload anh</h2>
-      <p className="tour-spotlight__panel-copy">
-        Screen nay duoc dat cung bo cuc voi detail tour de ban vua nhap, vua xem truoc cach san pham
-        se hien thi ra ngoai.
-      </p>
-
-      <div className="tour-spotlight__upload">
-        <label className="tour-spotlight__upload-button" htmlFor="tour-cover-upload">
-          <div>
-            <span className="material-symbols-outlined">cloud_upload</span>
-            <strong>Tai anh cover tour</strong>
-            <p className="tour-spotlight__upload-hint">PNG, JPG hoac WebP.</p>
-            <p className="tour-spotlight__upload-file" title={uploadLabel}>
-              {uploadLabel}
-            </p>
-          </div>
-        </label>
-        <input id="tour-cover-upload" type="file" accept="image/*" onChange={handleImageChange} />
-        <div className="tour-spotlight__upload-preview">
-          <img src={imagePreview} alt={previewName} />
-        </div>
-      </div>
-
-      <form className="tour-spotlight__form" onSubmit={handleSubmit}>
-        <div className="tour-spotlight__field">
-          <label htmlFor="tour-name">Ten tour</label>
-          <input
-            id="tour-name"
-            name="name"
-            placeholder="Vi du: Da Nang Skyline Escape"
-            value={formValues.name}
-            onChange={handleFieldChange('name')}
-          />
-        </div>
-
-        <div className="tour-spotlight__field-grid">
-          <label className="tour-spotlight__field" htmlFor="tour-location">
-            <span>Dia diem</span>
-            <input
-              id="tour-location"
-              name="location"
-              placeholder="Da Nang, Hoi An"
-              value={formValues.location}
-              onChange={handleFieldChange('location')}
-            />
-          </label>
-
-          <label className="tour-spotlight__field" htmlFor="tour-duration">
-            <span>Thoi luong</span>
-            <input
-              id="tour-duration"
-              name="duration"
-              placeholder="4 ngay 3 dem"
-              value={formValues.duration}
-              onChange={handleFieldChange('duration')}
-            />
-          </label>
-        </div>
-
-        <div className="tour-spotlight__field-grid">
-          <label className="tour-spotlight__field" htmlFor="tour-price">
-            <span>Gia tour</span>
-            <input
-              id="tour-price"
-              name="price"
-              type="number"
-              min="0"
-              placeholder="6290000"
-              value={formValues.price}
-              onChange={handleFieldChange('price')}
-            />
-          </label>
-
-          <label className="tour-spotlight__field" htmlFor="tour-status">
-            <span>Trang thai</span>
-            <select id="tour-status" name="status" value={formValues.status} onChange={handleFieldChange('status')}>
-              <option value="Draft">Draft</option>
-              <option value="Active">Active</option>
-            </select>
-          </label>
-        </div>
-
-        <div className="tour-spotlight__field-grid">
-          <label className="tour-spotlight__field" htmlFor="tour-transport">
-            <span>Di chuyen</span>
-            <input
-              id="tour-transport"
-              name="transport"
-              placeholder="May bay + xe dua don"
-              value={formValues.transport}
-              onChange={handleFieldChange('transport')}
-            />
-          </label>
-
-          <label className="tour-spotlight__field" htmlFor="tour-group">
-            <span>Suc chua</span>
-            <input
-              id="tour-group"
-              name="groupSize"
-              placeholder="Toi da 18 khach"
-              value={formValues.groupSize}
-              onChange={handleFieldChange('groupSize')}
-            />
-          </label>
-        </div>
-
-        <div className="tour-spotlight__field">
-          <label htmlFor="tour-departure">Lich khoi hanh</label>
-          <input
-            id="tour-departure"
-            name="departure"
-            placeholder="Thu 6 hang tuan, khoi hanh tu TPHCM"
-            value={formValues.departure}
-            onChange={handleFieldChange('departure')}
-          />
-        </div>
-
-        <div className="tour-spotlight__field">
-          <label htmlFor="tour-tagline">Tagline</label>
-          <input
-            id="tour-tagline"
-            name="tagline"
-            placeholder="Mot cau ngan de tao chat rieng cho tour"
-            value={formValues.tagline}
-            onChange={handleFieldChange('tagline')}
-          />
-        </div>
-
-        <label className="tour-spotlight__field" htmlFor="tour-description">
-          <span>Mo ta tong quan</span>
-          <textarea
-            id="tour-description"
-            name="description"
-            placeholder="Mo ta dai hon ve trai nghiem, doi tuong phu hop, cam xuc chu dao..."
-            value={formValues.description}
-            onChange={handleFieldChange('description')}
-          />
-        </label>
-
-        <label className="tour-spotlight__field" htmlFor="tour-includes">
-          <span>Dich vu bao gom</span>
-          <textarea
-            id="tour-includes"
-            name="includes"
-            placeholder="Moi dong mot dich vu: xe dua don, bua sang, ve tham quan..."
-            value={formValues.includes}
-            onChange={handleFieldChange('includes')}
-          />
-          <span className="tour-spotlight__field-hint">Moi dong se thanh mot item trong block "Bao gom".</span>
-        </label>
-
-        <label className="tour-spotlight__field" htmlFor="tour-highlights">
-          <span>Diem nhan</span>
-          <textarea
-            id="tour-highlights"
-            name="highlights"
-            placeholder="Moi dong mot diem nhan de hien thi thanh card preview."
-            value={formValues.highlights}
-            onChange={handleFieldChange('highlights')}
-          />
-        </label>
-
-        <div className="tour-spotlight__field-grid">
-          <label className="tour-spotlight__field" htmlFor="tour-day-1">
-            <span>Ngay 1</span>
-            <textarea
-              id="tour-day-1"
-              name="dayOne"
-              placeholder="Mo ta buoc mo dau"
-              value={formValues.dayOne}
-              onChange={handleFieldChange('dayOne')}
-            />
-          </label>
-
-          <label className="tour-spotlight__field" htmlFor="tour-day-2">
-            <span>Ngay 2</span>
-            <textarea
-              id="tour-day-2"
-              name="dayTwo"
-              placeholder="Mo ta phan cao trao"
-              value={formValues.dayTwo}
-              onChange={handleFieldChange('dayTwo')}
-            />
-          </label>
-        </div>
-
-        <label className="tour-spotlight__field" htmlFor="tour-day-3">
-          <span>Ngay 3</span>
-          <textarea
-            id="tour-day-3"
-            name="dayThree"
-            placeholder="Mo ta phan ket tour"
-            value={formValues.dayThree}
-            onChange={handleFieldChange('dayThree')}
-          />
-        </label>
-
-        {saveMessage ? <div className="tour-spotlight__inline-note">{saveMessage}</div> : null}
-
-        <div className="tour-spotlight__panel-actions">
-          <Button type="submit" icon="check">
-            Luu ban nhap
-          </Button>
-          <Button as={Link} to={ROUTES.tours} variant="secondary">
-            Quay lai danh sach
-          </Button>
-        </div>
-      </form>
-    </div>
-  );
+  const pricePreview = formValues.price ? `${formatCurrencyVnd(Number(formValues.price))}đ` : 'Chưa đặt giá';
+  const statusLabel = formValues.status === 'Active' ? 'Đang hoạt động' : 'Bản nháp';
 
   return (
     <div className="admin-page-shell">
       <HeroSection
-        title="Tao tour moi"
-        description="Mot screen mo rong de ban vua nhap noi dung, vua xem truoc chi tiet tour ngay trong admin."
+        title="Thêm tour mới"
+        description="Trang này được dựng theo nhịp của giao diện chi tiết tour bên ngoài, nhưng toàn bộ nội dung có thể sửa trực tiếp ngay trên bố cục."
         actions={
           <Button as={Link} to={ROUTES.tours} variant="secondary">
-            Ve trang tours
+            Về danh sách tour
           </Button>
         }
       />
 
-      <TourExperienceLayout
-        actions={
-          <Button as={Link} to={ROUTES.tours} variant="secondary">
-            Quay lai bang quan ly
-          </Button>
-        }
-        aside={aside}
-        badge={formValues.status}
-        description={previewDescription}
-        eyebrow="Tour draft preview"
-        heroAlt={previewName}
-        heroImage={imagePreview}
-        highlights={highlightItems}
-        highlightsTitle="Diem nhan dang duoc dinh hinh"
-        itinerary={itinerary}
-        itineraryTitle="Phac thao hanh trinh"
-        meta={[
-          { icon: 'location_on', label: previewLocation },
-          { icon: 'schedule', label: previewDuration },
-          { icon: 'groups', label: previewGroupSize },
-          { icon: 'flight_takeoff', label: previewTransport },
-        ]}
-        overviewCards={[
-          {
-            icon: 'auto_awesome',
-            title: 'Tagline san pham',
-            description: previewTagline,
-          },
-          {
-            icon: 'payments',
-            title: 'Gia dang preview',
-            description: `Screen dang hien gia de xuat: ${previewPrice}. Khi noi API, day co the map vao schema tours.`,
-          },
-          {
-            icon: 'inventory_2',
-            title: 'Nhung gi khach nhan duoc',
-            items: includedItems,
-          },
-          {
-            icon: 'edit_square',
-            title: 'Trang thai draft',
-            description:
-              formValues.status === 'Active'
-                ? 'Ban dang de trang thai Active. Neu day la du lieu that, tour co the du dieu kien xuat ban.'
-                : 'Tour dang o che do Draft, phu hop de nhap noi dung, kiem duyet va bo sung anh.',
-          },
-        ]}
-        overviewDescription="Khung preview nay duoc thiet ke cung phong cach voi chi tiet tour public, nhung duoc buoc vao form ben phai de admin chinh tren mot man hinh."
-        overviewTitle="Preview dang song"
-        quote="Ban dang nhin mot man hinh chung cho ca logic quan tri va giao dien public. Khi thong tin thay doi, preview ben trai se thay doi theo."
-        quoteAuthor="Admin tour builder"
-        stats={[
-          { label: 'Gia de xuat', value: previewPrice, helper: 'auto format o preview' },
-          { label: 'Trang thai', value: formValues.status, helper: 'ban nhap hien tai' },
-          { label: 'Khoi hanh', value: previewDeparture, helper: 'lich mo ta tu do' },
-          { label: 'Suc chua', value: previewGroupSize, helper: 'gioi han nhom' },
-        ]}
-        theme="admin"
-        title={previewName}
-      />
+      <form onSubmit={handleSubmit}>
+        <section className="tour-spotlight tour-spotlight--admin">
+          <div className="tour-spotlight__container">
+            <div className="tour-spotlight__hero">
+              <div className="tour-spotlight__hero-copy">
+                <div className="tour-spotlight__eyebrow-row">
+                  <span className="tour-spotlight__eyebrow">
+                    <input
+                      value={formValues.eyebrow}
+                      onChange={handleFieldChange('eyebrow')}
+                      className={pillInputClass}
+                      placeholder="Eyebrow"
+                    />
+                  </span>
+                  <span className="tour-spotlight__badge">
+                    <select
+                      value={formValues.badge}
+                      onChange={handleFieldChange('badge')}
+                      className={pillSelectClass}
+                      aria-label="Chọn badge cho tour"
+                    >
+                      <option value="">Không gắn badge</option>
+                      {BADGE_OPTIONS.filter(Boolean).map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  </span>
+                </div>
+
+                <input
+                  value={formValues.name}
+                  onChange={handleFieldChange('name')}
+                  className={headingInputClass}
+                  placeholder="Tên tour mới"
+                />
+
+                <textarea
+                  value={formValues.description}
+                  onChange={handleFieldChange('description')}
+                  className={richTextareaClass}
+                  placeholder="Mô tả dài cho phần hero. Gợi ý: nêu cảm xúc chủ đạo, kiểu hành trình và vì sao tour này đáng chọn."
+                />
+
+                <div className="tour-spotlight__meta">
+                  <label className="tour-spotlight__meta-chip min-w-[220px] flex-1">
+                    <span className="material-symbols-outlined">location_on</span>
+                    <input
+                      value={formValues.location}
+                      onChange={handleFieldChange('location')}
+                      className={inlineInputClass}
+                      placeholder="Điểm đến"
+                    />
+                  </label>
+
+                  <label className="tour-spotlight__meta-chip min-w-[220px] flex-1">
+                    <span className="material-symbols-outlined">schedule</span>
+                    <input
+                      value={formValues.duration}
+                      onChange={handleFieldChange('duration')}
+                      className={inlineInputClass}
+                      placeholder="Thời lượng"
+                    />
+                  </label>
+
+                  <label className="tour-spotlight__meta-chip min-w-[220px] flex-1">
+                    <span className="material-symbols-outlined">groups</span>
+                    <input
+                      value={formValues.groupSize}
+                      onChange={handleFieldChange('groupSize')}
+                      className={inlineInputClass}
+                      placeholder="Quy mô nhóm"
+                    />
+                  </label>
+
+                  <label className="tour-spotlight__meta-chip min-w-[220px] flex-1">
+                    <span className="material-symbols-outlined">flight_takeoff</span>
+                    <input
+                      value={formValues.transport}
+                      onChange={handleFieldChange('transport')}
+                      className={inlineInputClass}
+                      placeholder="Phương tiện"
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <div className="tour-spotlight__hero-media">
+                <img src={imagePreview} alt={formValues.name || 'Ảnh tour'} />
+                <div className="tour-spotlight__hero-glow" />
+              </div>
+            </div>
+
+            <div className="tour-spotlight__stats">
+              <article className="tour-spotlight__stat-card">
+                <span className="tour-spotlight__stat-label">Giá từ</span>
+                <input
+                  type="number"
+                  min="0"
+                  value={formValues.price}
+                  onChange={handleFieldChange('price')}
+                  className="mt-2 w-full border-none bg-transparent p-0 font-headline text-[clamp(1.4rem,3vw,2rem)] font-bold tracking-[-0.04em] text-primary outline-none placeholder:text-slate-300"
+                  placeholder="0"
+                />
+                <span className="tour-spotlight__stat-helper">Mỗi khách. Hiện hiển thị: {pricePreview}</span>
+              </article>
+
+              <article className="tour-spotlight__stat-card">
+                <span className="tour-spotlight__stat-label">Đánh giá</span>
+                <div className="mt-3 rounded-3xl border border-dashed border-slate-200 bg-slate-50/70 px-4 py-5 text-sm text-slate-400">
+                  <p className="font-semibold uppercase tracking-[0.08em] text-slate-300">Chưa có dữ liệu</p>
+                  <p className="mt-2 leading-6">Phần đánh giá sẽ để trống và chỉ hiển thị sau khi tour có nhận xét thực tế từ khách hàng.</p>
+                </div>
+              </article>
+
+              <article className="tour-spotlight__stat-card">
+                <span className="tour-spotlight__stat-label">Mùa đẹp</span>
+                <textarea
+                  value={formValues.season}
+                  onChange={handleFieldChange('season')}
+                  className="mt-2 min-h-[86px] w-full resize-none rounded-2xl border border-transparent bg-slate-50/80 px-3 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-primary/25 focus:ring-2 focus:ring-primary/10"
+                  placeholder="Ví dụ: Tháng 3 - tháng 8"
+                />
+              </article>
+
+              <article className="tour-spotlight__stat-card">
+                <span className="tour-spotlight__stat-label">Khởi hành</span>
+                <textarea
+                  value={formValues.departureNote}
+                  onChange={handleFieldChange('departureNote')}
+                  className="mt-2 min-h-[86px] w-full resize-none rounded-2xl border border-transparent bg-slate-50/80 px-3 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-primary/25 focus:ring-2 focus:ring-primary/10"
+                  placeholder="Ghi chú khởi hành gần nhất"
+                />
+              </article>
+            </div>
+
+            <div className="tour-spotlight__body">
+              <div className="tour-spotlight__main">
+                <blockquote className="tour-spotlight__quote">
+                  <textarea
+                    value={formValues.curatorNote}
+                    onChange={handleFieldChange('curatorNote')}
+                    className={quoteTextareaClass}
+                    placeholder="Ghi chú curator hoặc lời dẫn nổi bật cho tour..."
+                  />
+                  <input
+                    value={formValues.curatorName}
+                    onChange={handleFieldChange('curatorName')}
+                    className="mt-4 w-full border-none bg-transparent p-0 text-sm font-bold uppercase tracking-[0.06em] text-primary outline-none placeholder:text-slate-400"
+                    placeholder="Tên curator / người biên tập"
+                  />
+                </blockquote>
+
+                <section className="tour-spotlight__section">
+                  <div className="tour-spotlight__section-head">
+                    <h2>Chân dung của chuyến đi</h2>
+                    <p>Những khối nội dung cốt lõi được trình bày giống trang chi tiết tour phía ngoài.</p>
+                  </div>
+
+                  <div className="tour-spotlight__overview-grid">
+                    {formValues.overviewCards.map((card, index) => (
+                      <article key={`overview-${index}`} className="tour-spotlight__overview-card">
+                        <div className="tour-spotlight__card-icon">
+                          <span className="material-symbols-outlined">{OVERVIEW_ICONS[index]}</span>
+                        </div>
+                        <input
+                          value={card.title}
+                          onChange={handleOverviewCardChange(index, 'title')}
+                          className="mt-4 w-full border-none bg-transparent p-0 font-headline text-[1.18rem] font-bold tracking-[-0.03em] text-on-surface outline-none placeholder:text-slate-400"
+                          placeholder={`Tiêu đề card ${index + 1}`}
+                        />
+                        <textarea
+                          value={card.description}
+                          onChange={handleOverviewCardChange(index, 'description')}
+                          className={cardTextareaClass}
+                          placeholder={`Mô tả cho card ${index + 1}`}
+                        />
+                      </article>
+                    ))}
+
+                    <article className="tour-spotlight__overview-card">
+                      <div className="tour-spotlight__card-icon">
+                        <span className="material-symbols-outlined">inventory_2</span>
+                      </div>
+                      <h3>Bao gồm trong gói</h3>
+                      <div className="mt-4 grid gap-3">
+                        {formValues.includedItems.map((item, index) => (
+                          <div key={`included-${index}`} className="flex items-center gap-3">
+                            <input
+                              value={item}
+                              onChange={handleStringArrayChange('includedItems', index)}
+                              className={panelInputClass}
+                              placeholder={`Dịch vụ bao gồm ${index + 1}`}
+                            />
+                            <Button type="button" variant="outline" size="sm" onClick={removeStringArrayItem('includedItems', index)}>
+                              Xóa
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-4">
+                        <Button type="button" variant="secondary" size="sm" onClick={addStringArrayItem('includedItems')}>
+                          Thêm mục bao gồm
+                        </Button>
+                      </div>
+                    </article>
+                  </div>
+                </section>
+
+                <section className="tour-spotlight__section">
+                  <div className="tour-spotlight__section-head">
+                    <h2>Lý do hành trình này được chọn nhiều</h2>
+                    <p>Phần này tương ứng với các highlight card trên trang chi tiết tour public.</p>
+                  </div>
+
+                  <div className="mb-4">
+                    <Button type="button" variant="secondary" size="sm" onClick={addHighlight}>
+                      Thêm điểm nhấn
+                    </Button>
+                  </div>
+
+                  <div className="tour-spotlight__highlights">
+                    {formValues.highlights.map((highlight, index) => (
+                      <article key={`highlight-${index}`} className="tour-spotlight__highlight-card">
+                        <div className="tour-spotlight__highlight-icon">
+                          <span className="material-symbols-outlined">
+                            {highlight.icon || HIGHLIGHT_ICONS[index % HIGHLIGHT_ICONS.length]}
+                          </span>
+                        </div>
+                        <div className="w-full">
+                          <div className="flex items-center justify-between gap-3">
+                            <input
+                              value={highlight.title}
+                              onChange={handleHighlightChange(index, 'title')}
+                              className="w-full border-none bg-transparent p-0 font-headline text-[1.18rem] font-bold tracking-[-0.03em] text-on-surface outline-none placeholder:text-slate-400"
+                              placeholder={`Tiêu đề điểm nhấn ${index + 1}`}
+                            />
+                            <Button type="button" variant="outline" size="sm" onClick={removeHighlight(index)}>
+                              Xóa
+                            </Button>
+                          </div>
+                          <textarea
+                            value={highlight.description}
+                            onChange={handleHighlightChange(index, 'description')}
+                            className={`${richTextareaClass} mt-3`}
+                            placeholder={`Mô tả điểm nhấn ${index + 1}`}
+                          />
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+
+                <section className="tour-spotlight__section">
+                  <div className="tour-spotlight__section-head">
+                    <h2>Nhịp trải nghiệm theo từng ngày</h2>
+                    <p>Timeline được dựng giống trang chi tiết tour và cho phép thêm hoặc bớt ngày ngay trên giao diện.</p>
+                  </div>
+
+                  <div className="mb-4">
+                    <Button type="button" variant="secondary" size="sm" onClick={addItinerary}>
+                      Thêm lịch trình gợi ý
+                    </Button>
+                  </div>
+
+                  <div className="tour-spotlight__timeline">
+                    {formValues.itinerary.map((item, index) => (
+                      <article key={`itinerary-${index}`} className="tour-spotlight__timeline-item">
+                        <div className="tour-spotlight__timeline-marker">
+                          <span>{item.label || `Ngày ${index + 1}`}</span>
+                        </div>
+
+                        <div className="tour-spotlight__timeline-card">
+                          <div className="flex flex-wrap items-center justify-between gap-3">
+                            <input
+                              value={item.title}
+                              onChange={handleItineraryChange(index, 'title')}
+                              className="w-full border-none bg-transparent p-0 font-headline text-[1.18rem] font-bold tracking-[-0.03em] text-on-surface outline-none placeholder:text-slate-400"
+                              placeholder={`Tiêu đề ngày ${index + 1}`}
+                            />
+                            <Button type="button" variant="outline" size="sm" onClick={removeItinerary(index)}>
+                              Xóa
+                            </Button>
+                          </div>
+
+                          <input
+                            value={item.label}
+                            onChange={handleItineraryChange(index, 'label')}
+                            className={`${panelInputClass} mt-3`}
+                            placeholder={`Nhãn ngày ${index + 1}`}
+                          />
+
+                          <textarea
+                            value={item.description}
+                            onChange={handleItineraryChange(index, 'description')}
+                            className={`${richTextareaClass} mt-3`}
+                            placeholder={`Mô tả nhịp trải nghiệm ngày ${index + 1}`}
+                          />
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              </div>
+
+              <aside className="tour-spotlight__aside">
+                <div className="tour-spotlight__panel tour-spotlight__panel--accent">
+                  <p className="tour-spotlight__panel-eyebrow">Sẵn sàng cấu hình</p>
+                  <h2 className="tour-spotlight__panel-title">Khối vận hành theo kiểu trang chi tiết tour</h2>
+                  <p className="tour-spotlight__panel-copy">
+                    Khu vực này mô phỏng panel bên phải của trang chi tiết tour ngoài frontend, nhưng cho phép bạn nhập và chỉnh sửa trực tiếp.
+                  </p>
+
+                  <div className="tour-spotlight__upload">
+                    <label className="tour-spotlight__upload-button" htmlFor="tour-cover-upload">
+                      <div>
+                        <span className="material-symbols-outlined">cloud_upload</span>
+                        <strong>Đổi ảnh cover</strong>
+                        <p className="tour-spotlight__upload-hint">PNG, JPG hoặc WebP</p>
+                        <p className="tour-spotlight__upload-file" title={uploadLabel}>
+                          {uploadLabel}
+                        </p>
+                      </div>
+                    </label>
+                    <input id="tour-cover-upload" type="file" accept="image/*" onChange={handleImageChange} />
+                    <div className="tour-spotlight__upload-preview">
+                      <img src={imagePreview} alt={formValues.name || 'Ảnh cover'} />
+                    </div>
+                  </div>
+
+                  <div className="tour-spotlight__panel-price">
+                    <div>
+                      <span>Giá tham khảo</span>
+                      <strong>{pricePreview}</strong>
+                    </div>
+                    <em>{formValues.badge || statusLabel}</em>
+                  </div>
+
+                  <div className="mt-4 grid gap-3">
+                    <select
+                      value={formValues.status}
+                      onChange={handleFieldChange('status')}
+                      className={panelInputClass}
+                    >
+                      <option value="Draft">Bản nháp</option>
+                      <option value="Active">Đang hoạt động</option>
+                    </select>
+
+                    <textarea
+                      value={formValues.departureSchedule}
+                      onChange={handleFieldChange('departureSchedule')}
+                      className={compactTextareaClass}
+                      placeholder="Khởi hành chi tiết"
+                    />
+
+                    <textarea
+                      value={formValues.meetingPoint}
+                      onChange={handleFieldChange('meetingPoint')}
+                      className={compactTextareaClass}
+                      placeholder="Điểm đón / nơi gặp"
+                    />
+                  </div>
+
+                  <dl className="tour-spotlight__panel-meta">
+                    <div>
+                      <dt>Khởi hành</dt>
+                      <dd>{formValues.departureSchedule || 'Đang cập nhật'}</dd>
+                    </div>
+                    <div>
+                      <dt>Điểm đón</dt>
+                      <dd>{formValues.meetingPoint || 'Đang cập nhật'}</dd>
+                    </div>
+                    <div>
+                      <dt>Nhóm tối đa</dt>
+                      <dd>{formValues.groupSize || 'Đang cập nhật'}</dd>
+                    </div>
+                  </dl>
+
+                  <div className="tour-spotlight__panel-divider" />
+
+                  <p className="tour-spotlight__panel-eyebrow">Cam kết trải nghiệm</p>
+                  <div className="mt-4 grid gap-3">
+                    {formValues.promiseItems.map((item, index) => (
+                      <div key={`promise-${index}`} className="flex items-center gap-3">
+                        <input
+                          value={item}
+                          onChange={handleStringArrayChange('promiseItems', index)}
+                          className={panelInputClass}
+                          placeholder={`Cam kết ${index + 1}`}
+                        />
+                        <Button type="button" variant="outline" size="sm" onClick={removeStringArrayItem('promiseItems', index)}>
+                          Xóa
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-4">
+                    <Button type="button" variant="secondary" size="sm" onClick={addStringArrayItem('promiseItems')}>
+                      Thêm cam kết
+                    </Button>
+                  </div>
+
+                  <div className="tour-spotlight__panel-actions">
+                    <Button type="submit" disabled={isSaving}>
+                      {isSaving ? 'Đang lưu...' : 'Lưu tour'}
+                    </Button>
+                    <Button as={Link} to={ROUTES.tours} variant="secondary">
+                      Quay lại danh sách
+                    </Button>
+                  </div>
+
+                  {saveMessage ? <div className="tour-spotlight__inline-note">{saveMessage}</div> : null}
+                </div>
+              </aside>
+            </div>
+          </div>
+        </section>
+      </form>
     </div>
   );
 }

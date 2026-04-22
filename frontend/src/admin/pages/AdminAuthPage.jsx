@@ -10,23 +10,23 @@ import '../styles/admin-auth.css';
 
 const PAGE_COPY = {
   login: {
-    eyebrow: 'Admin access',
-    title: 'Dang nhap khu quan tri ADN Travel',
+    eyebrow: 'Truy cập quản trị',
+    title: 'Đăng nhập khu quản trị ADN Travel',
     subtitle:
-      'Khu vuc nay danh rieng cho bo phan dieu hanh, kiem duyet tour va cap nhat noi dung he thong.',
-    submitLabel: 'Dang nhap admin',
-    footerText: 'Chua co tai khoan admin?',
-    footerAction: 'Tao tai khoan',
+      'Khu vực này dành riêng cho bộ phận điều hành, kiểm duyệt tour và cập nhật nội dung hệ thống.',
+    submitLabel: 'Đăng nhập admin',
+    footerText: 'Chưa có tài khoản admin?',
+    footerAction: 'Tạo tài khoản',
     footerPath: ROUTES.register,
   },
   register: {
-    eyebrow: 'Admin onboarding',
-    title: 'Tao tai khoan quan tri moi',
+    eyebrow: 'Khởi tạo quản trị viên',
+    title: 'Tạo tài khoản quản trị mới',
     subtitle:
-      'Dang ky nhanh mot tai khoan admin moi de truy cap dashboard, quan ly tour va theo doi booking.',
-    submitLabel: 'Dang ky admin',
-    footerText: 'Da co tai khoan admin?',
-    footerAction: 'Dang nhap ngay',
+      'Đăng ký nhanh một tài khoản admin mới để truy cập dashboard, quản lý tour và theo dõi booking.',
+    submitLabel: 'Đăng ký admin',
+    footerText: 'Đã có tài khoản admin?',
+    footerAction: 'Đăng nhập ngay',
     footerPath: ROUTES.login,
   },
 };
@@ -138,16 +138,16 @@ export default function AdminAuthPage({ mode = 'login' }) {
             <div className="admin-auth-card__highlight">
               <span className="material-symbols-outlined">shield_lock</span>
               <div>
-                <strong>Scope rieng cho admin</strong>
-                <p>Session nay duoc tach rieng voi tai khoan public va xac thuc bang bang `admins`.</p>
+                <strong>Scope riêng cho admin</strong>
+                <p>Phiên này được tách riêng với tài khoản người dùng và xác thực bằng bảng `admins`..</p>
               </div>
             </div>
 
             <div className="admin-auth-card__highlight">
               <span className="material-symbols-outlined">travel_explore</span>
               <div>
-                <strong>Truy cap dashboard nhanh</strong>
-                <p>Sau khi dang nhap xong, he thong se dua ban ve lai khu admin dang muon truy cap.</p>
+                <strong>Truy cập dashboard nhanh</strong>
+                <p>Sau khi đăng nhập thành công, bạn sẽ được chuyển hướng về đúng khu vực quản trị đã yêu cầu trước đó.</p>
               </div>
             </div>
           </div>
@@ -257,7 +257,7 @@ export default function AdminAuthPage({ mode = 'login' }) {
                     type="checkbox"
                     onChange={handleLoginChange}
                   />
-                  <span>Ghi nho phien admin tren trinh duyet nay</span>
+                 <span>Ghi nhớ phiên đăng nhập admin trên trình duyệt này</span>
                 </label>
               </>
             )}

@@ -1,17 +1,39 @@
-import { useDeferredValue, useState } from 'react';
+import { useDeferredValue, useEffect, useState } from 'react';
 
-const MAX_PRICE_RANGE = 20000000;
+const FALLBACK_MAX_PRICE_RANGE = 20000000;
 const DEFAULT_SORT_BY = 'popular';
 
+function getMaxPriceRange(tours) {
+  const maxPrice = tours.reduce((highestPrice, tour) => {
+    const nextPrice = Number(tour.price || 0);
+    return nextPrice > highestPrice ? nextPrice : highestPrice;
+  }, 0);
+
+  if (!maxPrice) {
+    return FALLBACK_MAX_PRICE_RANGE;
+  }
+
+  return Math.ceil(maxPrice / 500000) * 500000;
+}
+
 function useTourFilters(tours, initialSearch = '') {
+  const maxPriceRange = getMaxPriceRange(tours);
   const [searchText, setSearchText] = useState(initialSearch);
   const [selectedDestinations, setSelectedDestinations] = useState([]);
-  const [priceRange, setPriceRange] = useState(MAX_PRICE_RANGE);
+  const [priceRange, setPriceRange] = useState(maxPriceRange);
   const [selectedDuration, setSelectedDuration] = useState('all');
   const [selectedRating, setSelectedRating] = useState('all');
   const [sortBy, setSortBy] = useState(DEFAULT_SORT_BY);
 
   const deferredSearchText = useDeferredValue(searchText);
+
+  useEffect(() => {
+    setPriceRange((currentRange) => (
+      currentRange > maxPriceRange || currentRange === FALLBACK_MAX_PRICE_RANGE
+        ? maxPriceRange
+        : currentRange
+    ));
+  }, [maxPriceRange]);
 
   const toggleDestination = (destination) => {
     setSelectedDestinations((current) =>
@@ -26,7 +48,7 @@ function useTourFilters(tours, initialSearch = '') {
   const resetFilters = () => {
     setSearchText('');
     setSelectedDestinations([]);
-    setPriceRange(MAX_PRICE_RANGE);
+    setPriceRange(maxPriceRange);
     setSelectedDuration('all');
     setSelectedRating('all');
     setSortBy(DEFAULT_SORT_BY);
@@ -35,7 +57,7 @@ function useTourFilters(tours, initialSearch = '') {
   const isShowingAll =
     !deferredSearchText.trim()
     && !selectedDestinations.length
-    && priceRange === MAX_PRICE_RANGE
+    && priceRange === maxPriceRange
     && selectedDuration === 'all'
     && selectedRating === 'all'
     && sortBy === DEFAULT_SORT_BY;
@@ -97,6 +119,7 @@ function useTourFilters(tours, initialSearch = '') {
     clearDestinations,
     filteredTours,
     isShowingAll,
+    maxPriceRange,
     priceRange,
     resetFilters,
     searchText,

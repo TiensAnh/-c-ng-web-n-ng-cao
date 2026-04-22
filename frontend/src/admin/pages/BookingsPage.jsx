@@ -131,7 +131,7 @@ export default function BookingsPage() {
   return (
     <div className="admin-page-shell">
       <HeroSection
-        title={bookingsPage.title.replace(" | The Horizon Admin", "")}
+        title={bookingsPage.title}
         description={bookingsPage.description}
         actions={
           <>

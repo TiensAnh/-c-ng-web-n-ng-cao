@@ -64,7 +64,7 @@ export function getLayoutContent(pathname) {
 }
 
 export const dashboardPage = {
-  title: "The Horizon - Admin Dashboard",
+  title: "ADN Travel - Admin Dashboard",
   summaryCards: [
     {
       id: "total-tours",
@@ -165,7 +165,7 @@ export const dashboardPage = {
 export const toursPage = {
   title: "Quan ly Tour",
   description:
-    "Curate and manage premium travel experiences for The Horizon travelers worldwide.",
+    "Curate and manage premium travel experiences for ADN Travel travelers worldwide.",
   rows: [
     {
       id: "TR-8829",
@@ -313,7 +313,7 @@ export const bookingsPage = {
 };
 
 export const usersPage = {
-  title: "User Management | The Horizon Admin",
+  title: "User Management | ADN Travel Admin",
   stats: [
     {
       id: "total-users",
@@ -347,7 +347,7 @@ export const usersPage = {
     {
       id: "marcus-ardelio",
       name: "Marcus Ardelio",
-      email: "marcus.a@horizon.com",
+      email: "marcus.a@adntravel.vn",
       avatar: images.usersMarcus,
       role: "Admin",
       roleTone: "admin",
@@ -383,7 +383,7 @@ export const usersPage = {
     {
       id: "lila-thorne",
       name: "Lila Thorne",
-      email: "lila.t@thehorizon.travel",
+      email: "lila.t@adntravel.vn",
       avatar: images.usersLila,
       role: "Admin",
       roleTone: "admin",
@@ -446,7 +446,7 @@ export const reviewsPage = {
       rating: 5,
       tour: "Swiss Alps Glacier Hike",
       content:
-        "Simply magical. Every detail was handled by The Horizon. I have never felt so taken care of on an adventure trip. The local cheese tasting was a wonderful surprise!",
+        "Simply magical. Every detail was handled by ADN Travel. I have never felt so taken care of on an adventure trip. The local cheese tasting was a wonderful surprise!",
       avatar: images.reviewsSarah,
       reported: false,
     },
@@ -465,7 +465,7 @@ export const reviewsPage = {
 };
 
 export const paymentsPage = {
-  title: "Payments & Transactions | The Horizon Admin",
+  title: "Payments & Transactions | ADN Travel Admin",
   hero: {
     label: "Total Treasury Balance",
     value: "$142,850.24",

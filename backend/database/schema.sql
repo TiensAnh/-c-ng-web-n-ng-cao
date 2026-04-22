@@ -24,10 +24,29 @@ CREATE TABLE tours (
     price DECIMAL(10,2),
     location VARCHAR(255),
     duration INT,
+    duration_text VARCHAR(100),
     max_people INT,
+    status VARCHAR(20) DEFAULT 'Draft',
+    image_url VARCHAR(500),
+    transport VARCHAR(100),
+    departure_note VARCHAR(255),
+    tagline VARCHAR(255),
+    badge VARCHAR(100),
+    season VARCHAR(100),
+    departure_schedule VARCHAR(255),
+    meeting_point VARCHAR(255),
+    curator_note TEXT,
+    curator_name VARCHAR(255),
+    included_items_json TEXT,
+    promise_items_json TEXT,
+    overview_cards_json TEXT,
+    highlights_json TEXT,
+    itinerary_json TEXT,
     created_by INT,
+    created_by_admin_id INT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (created_by) REFERENCES users(id)
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    FOREIGN KEY (created_by_admin_id) REFERENCES admins(id)
 );
 
 CREATE TABLE bookings (
@@ -72,12 +91,4 @@ CREATE TABLE reviews (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (tour_id) REFERENCES tours(id)
-);
-CREATE TABLE admins (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    role ENUM('admin') DEFAULT 'admin',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

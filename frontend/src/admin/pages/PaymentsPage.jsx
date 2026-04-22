@@ -64,7 +64,7 @@ export default function PaymentsPage() {
 
       <SectionCard
         title="Recent Transactions"
-        description="Monitoring all financial activities within the horizon ecosystem."
+        description="Monitoring all financial activities within the ADN Travel ecosystem."
         contentClassName="p-0"
         actions={
           <div className="flex flex-wrap gap-3">
@@ -158,7 +158,7 @@ export default function PaymentsPage() {
           <div>
             <h3 className="text-lg font-bold text-on-surface">Security & Compliance</h3>
             <p className="mt-1 text-sm text-slate-500">
-              Horizon uses PCI-DSS Level 1 compliant infrastructure for all transaction processing. All data is encrypted at rest and in transit.
+              ADN Travel uses PCI-DSS Level 1 compliant infrastructure for all transaction processing. All data is encrypted at rest and in transit.
             </p>
           </div>
         </article>

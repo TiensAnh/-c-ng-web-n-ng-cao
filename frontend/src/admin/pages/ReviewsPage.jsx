@@ -11,7 +11,7 @@ import { reviewsPage } from "../services/adminService";
 export default function ReviewsPage() {
   const [activeFilter, setActiveFilter] = useState(reviewsPage.filterOptions[0]);
 
-  useDocumentTitle("Reviews | The Horizon Admin");
+  useDocumentTitle("Reviews | ADN Travel Admin");
 
   const visibleReviews = reviewsPage.rows.filter((review) => {
     if (activeFilter === "1-2 Stars") {
