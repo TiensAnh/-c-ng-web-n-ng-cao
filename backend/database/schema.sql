@@ -13,7 +13,7 @@ CREATE TABLE users (
     email VARCHAR(255) UNIQUE,
     phone VARCHAR(20) UNIQUE,
     password VARCHAR(255),
-    role VARCHAR(20) DEFAULT 'USER',
+    role ENUM('USER', 'STAFF') NOT NULL DEFAULT 'USER',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 

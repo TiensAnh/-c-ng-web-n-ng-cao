@@ -9,7 +9,7 @@ INSERT INTO admins (username, email, password, role) VALUES
 
 -- USERS
 INSERT INTO users (name, email, phone, password, role) VALUES
-('Admin',           'admin@gmail.com',   '0900000001', '123456', 'ADMIN'),
+('Dieu hanh vien',  'staff1@gmail.com',  '0900000001', '123456', 'STAFF'),
 ('Nhan vien',       'staff@gmail.com',   '0900000002', '123456', 'STAFF'),
 ('Nguyen Van A',    'user1@gmail.com',   '0900000003', '123456', 'USER'),
 ('Tran Van B',      'user2@gmail.com',   '0900000004', '123456', 'USER'),
