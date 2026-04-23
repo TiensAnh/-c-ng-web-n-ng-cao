@@ -15,6 +15,10 @@ export function getEditTourRoute(tourId) {
   return `/admin/tours/${tourId}/edit`;
 }
 
+export function getBookingManagementRoute(bookingId) {
+  return `/admin/bookings?bookingId=${bookingId}`;
+}
+
 export const NAV_ITEMS = [
   { key: "dashboard", label: "Dashboard", path: ROUTES.dashboard, icon: "dashboard" },
   { key: "tours", label: "Tours", path: ROUTES.tours, icon: "explore" },

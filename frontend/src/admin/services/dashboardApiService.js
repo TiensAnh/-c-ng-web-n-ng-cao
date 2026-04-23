@@ -49,7 +49,7 @@ function getInitials(name = '') {
 function mapRevenueBars(monthlyRevenue = []) {
   if (!monthlyRevenue.length) {
     return [
-      { label: 'N/A', height: 36, active: true },
+      { label: 'N/A', height: 36, active: true, revenue: 0 },
     ];
   }
 
@@ -61,12 +61,14 @@ function mapRevenueBars(monthlyRevenue = []) {
     height: Math.max(36, Math.round((Number(item.revenue || 0) / maxRevenue) * 220)),
     active: index === monthlyRevenue.length - 1,
     secondary: index === monthlyRevenue.length - 2,
+    revenue: Number(item.revenue || 0),
   }));
 }
 
 function mapRecentBookings(bookings = []) {
   return bookings.map((booking) => ({
-    id: `#BK-${booking.id}`,
+    id: booking.id,
+    displayId: `#BK-${booking.id}`,
     customer: booking.user_name || 'Unknown user',
     tour: booking.tour_title || 'Unknown tour',
     date: new Intl.DateTimeFormat('en-US', {
@@ -127,6 +129,7 @@ export async function getDashboardRequest(token) {
     chartData: {
       monthly: mapRevenueBars(response.monthlyRevenue || []),
     },
+    hasRevenueData: (response.monthlyRevenue || []).some((item) => Number(item.revenue || 0) > 0),
     recentBookings: mapRecentBookings(response.recentBookings || []),
   };
 }

@@ -5,6 +5,7 @@ import { useAuth } from '../../shared/context/AuthContext';
 import {
   cancelMyBookingRequest,
   createPaymentRequest,
+  createReviewRequest,
   getMyBookingDetailRequest,
   getMyBookingsRequest,
 } from '../services/bookingApiService';
@@ -33,6 +34,8 @@ export default function MyBookingsPage() {
   const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('MOMO');
   const [isPaying, setIsPaying] = useState(false);
+  const [reviewForm, setReviewForm] = useState({ rating: '5', comment: '' });
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [error, setError] = useState('');
   const [actionMessage, setActionMessage] = useState('');
 
@@ -178,6 +181,41 @@ export default function MyBookingsPage() {
       setError(paymentError.message || 'Khong the thanh toan booking luc nay.');
     } finally {
       setIsPaying(false);
+    }
+  };
+
+  const handleReviewSubmit = async (bookingId) => {
+    if (!token) {
+      return;
+    }
+
+    setIsSubmittingReview(true);
+    setActionMessage('');
+    setError('');
+
+    try {
+      const response = await createReviewRequest({
+        booking_id: bookingId,
+        rating: Number(reviewForm.rating),
+        comment: reviewForm.comment,
+      }, token);
+
+      setBookings((currentBookings) => currentBookings.map((booking) => (
+        booking.id === bookingId
+          ? { ...booking, has_review: true, can_review: false, review_id: response.review?.id || booking.review_id }
+          : booking
+      )));
+      setSelectedBooking((currentBooking) => (
+        currentBooking?.id === bookingId
+          ? { ...currentBooking, has_review: true, can_review: false, review_id: response.review?.id || currentBooking.review_id }
+          : currentBooking
+      ));
+      setReviewForm({ rating: '5', comment: '' });
+      setActionMessage('Gui danh gia thanh cong.');
+    } catch (reviewError) {
+      setError(reviewError.message || 'Khong the gui danh gia luc nay.');
+    } finally {
+      setIsSubmittingReview(false);
     }
   };
 
@@ -344,6 +382,44 @@ export default function MyBookingsPage() {
                   ) : null}
                 </>
               )}
+
+              {selectedBooking.can_review ? (
+                <div className="account-page__payment-box">
+                  <p className="account-page__payment-title">Danh gia chuyen di</p>
+                  <div className="tour-spotlight__field">
+                    <label htmlFor="review-rating">So sao</label>
+                    <select
+                      id="review-rating"
+                      value={reviewForm.rating}
+                      onChange={(event) => setReviewForm((current) => ({ ...current, rating: event.target.value }))}
+                    >
+                      <option value="5">5 sao</option>
+                      <option value="4">4 sao</option>
+                      <option value="3">3 sao</option>
+                      <option value="2">2 sao</option>
+                      <option value="1">1 sao</option>
+                    </select>
+                  </div>
+                  <div className="tour-spotlight__field">
+                    <label htmlFor="review-comment">Nhan xet</label>
+                    <textarea
+                      id="review-comment"
+                      value={reviewForm.comment}
+                      onChange={(event) => setReviewForm((current) => ({ ...current, comment: event.target.value }))}
+                      placeholder="Chia se trai nghiem cua ban ve chuyen di nay..."
+                    />
+                  </div>
+                  <Button disabled={isSubmittingReview} onClick={() => handleReviewSubmit(selectedBooking.id)}>
+                    {isSubmittingReview ? 'Dang gui danh gia...' : 'Gui danh gia'}
+                  </Button>
+                </div>
+              ) : null}
+
+              {selectedBooking.has_review ? (
+                <div className="account-page__detail-empty">
+                  Booking nay da co danh gia. Cam on ban da chia se trai nghiem.
+                </div>
+              ) : null}
             </div>
           ) : (
             <div className="account-page__detail-empty">

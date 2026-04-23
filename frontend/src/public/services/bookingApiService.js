@@ -122,3 +122,13 @@ export function createPaymentRequest(payload, token) {
     defaultErrorMessage: 'Khong the thanh toan luc nay.',
   });
 }
+
+export function createReviewRequest(payload, token) {
+  return apiRequest('/reviews', {
+    method: 'POST',
+    token,
+    body: JSON.stringify(payload),
+    connectionErrorMessage: 'Khong the ket noi toi backend review.',
+    defaultErrorMessage: 'Khong the gui danh gia luc nay.',
+  });
+}

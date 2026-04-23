@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import Avatar from '../components/Avatar';
 import Button from '../components/Button';
 import DataTable from '../components/DataTable';
@@ -30,6 +31,7 @@ function formatCurrency(value) {
 }
 
 export default function BookingsPage() {
+  const location = useLocation();
   const { adminToken } = useAdminAuth();
   const [bookingRows, setBookingRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -37,8 +39,17 @@ export default function BookingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [isUpdatingId, setIsUpdatingId] = useState(null);
+  const bookingIdFromQuery = new URLSearchParams(location.search).get('bookingId');
 
   useDocumentTitle('Bookings Management');
+
+  useEffect(() => {
+    if (!bookingIdFromQuery) {
+      return;
+    }
+
+    setSearchQuery(`#BK-${bookingIdFromQuery}`);
+  }, [bookingIdFromQuery]);
 
   useEffect(() => {
     let isMounted = true;

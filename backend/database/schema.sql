@@ -84,11 +84,15 @@ CREATE TABLE payments (
 
 CREATE TABLE reviews (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    booking_id INT NOT NULL UNIQUE,
     user_id INT,
     tour_id INT,
     rating INT,
     comment TEXT,
+    status VARCHAR(20) DEFAULT 'VISIBLE',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (booking_id) REFERENCES bookings(id),
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (tour_id) REFERENCES tours(id)
 );

@@ -1,5 +1,16 @@
 const db = require('../config/db');
 
+function addReviewState(booking) {
+  const hasReview = Boolean(booking.review_id);
+
+  return {
+    ...booking,
+    review_id: booking.review_id || null,
+    has_review: hasReview,
+    can_review: booking.status === 'COMPLETED' && !hasReview,
+  };
+}
+
 // =====================================================
 // USER APIS
 // =====================================================
@@ -74,9 +85,11 @@ exports.getMyBookings = async (req, res) => {
 
   try {
     const [rows] = await db.query(
-      `SELECT b.*, t.title AS tour_title, t.location, t.image_url, t.duration, t.duration_text
+      `SELECT b.*, t.title AS tour_title, t.location, t.image_url, t.duration, t.duration_text,
+              r.id AS review_id
        FROM bookings b
        JOIN tours t ON t.id = b.tour_id
+       LEFT JOIN reviews r ON r.booking_id = b.id
        WHERE b.user_id = ?
        ORDER BY b.created_at DESC`,
       [userId],
@@ -84,7 +97,7 @@ exports.getMyBookings = async (req, res) => {
 
     return res.status(200).json({
       message: 'Lay danh sach booking thanh cong.',
-      bookings: rows,
+      bookings: rows.map(addReviewState),
     });
   } catch (error) {
     return res.status(500).json({ message: 'Khong the lay danh sach booking.', error: error.message });
@@ -104,9 +117,11 @@ exports.getMyBookingById = async (req, res) => {
   try {
     const [rows] = await db.query(
       `SELECT b.*, 
-              t.title AS tour_title, t.location, t.image_url, t.duration, t.duration_text, t.transport, t.meeting_point
+              t.title AS tour_title, t.location, t.image_url, t.duration, t.duration_text, t.transport, t.meeting_point,
+              r.id AS review_id
        FROM bookings b
        JOIN tours t ON t.id = b.tour_id
+       LEFT JOIN reviews r ON r.booking_id = b.id
        WHERE b.id = ? AND b.user_id = ? LIMIT 1`,
       [bookingId, userId],
     );
@@ -123,7 +138,7 @@ exports.getMyBookingById = async (req, res) => {
 
     return res.status(200).json({
       message: 'Lay chi tiet booking thanh cong.',
-      booking: { ...rows[0], payment: payments[0] || null },
+      booking: { ...addReviewState(rows[0]), payment: payments[0] || null },
     });
   } catch (error) {
     return res.status(500).json({ message: 'Khong the lay chi tiet booking.', error: error.message });

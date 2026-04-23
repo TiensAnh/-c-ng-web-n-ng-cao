@@ -296,10 +296,6 @@ INSERT INTO payments (booking_id, amount, method, status, paid_at) VALUES
 (10, 4800000, 'BANK_TRANSFER', 'SUCCESS', '2026-04-10 12:00:00');
 
 -- REVIEWS
-INSERT INTO reviews (user_id, tour_id, rating, comment, created_at) VALUES
-(3, 1,  5, 'Tour tuyệt vời! Hướng dẫn viên nhiệt tình, cảnh đẹp không thể quên.', '2026-05-04 10:00:00'),
-(4, 2,  4, 'Dịch vụ ổn, xe đi thoải mái. Bà Nà Hills rất đẹp. Sẽ quay lại!',   '2026-05-13 11:00:00'),
-(5, 3,  5, 'Phú Quốc đẹp hơn mình tưởng. Resort xịn, biển xanh, cá to.',       '2026-06-05 09:00:00'),
-(6, 5,  4, 'Đà Lạt lãng mạn lắm. Cà phê sáng trong sương mù rất thú vị.',     '2026-05-19 10:00:00'),
-(3, 11, 3, 'Tour bị huỷ nên chưa đi được. Hoàn tiền nhanh, nhân viên hỗ trợ OK.', '2026-05-22 11:00:00'),
-(4, 13, 5, 'Hội An ban đêm đẹp lắm! Đèn lồng tuyệt đẹp, ẩm thực ngon.',       '2026-06-08 09:00:00');
+INSERT INTO reviews (booking_id, user_id, tour_id, rating, comment, status, created_at, updated_at) VALUES
+(4, 6, 5, 4, 'Da Lat lang man, lich trinh nhe va huong dan vien nhiet tinh.', 'VISIBLE', '2026-05-19 10:00:00', '2026-05-19 10:00:00'),
+(8, 4, 13, 5, 'Hoi An ban dem dep, den long dep va am thuc rat ngon.', 'VISIBLE', '2026-06-08 09:00:00', '2026-06-08 09:00:00');

@@ -11,6 +11,7 @@ const adminAuthRoutes = require('../routes/adminAuth.routes');
 const authRoutes = require('../routes/auth.routes');
 const bookingsRoutes = require('../routes/bookings.routes');
 const paymentsRoutes = require('../routes/payments.routes');
+const reviewsRoutes = require('../routes/reviews.routes');
 const statsRoutes = require('../routes/stats.routes');
 const toursRoutes = require('../routes/tours.routes');
 const usersRoutes = require('../routes/users.routes');
@@ -45,6 +46,7 @@ app.use('/api/admin-auth', adminAuthRoutes);
 app.use('/api/tours', toursRoutes);
 app.use('/api/bookings', bookingsRoutes);
 app.use('/api/payments', paymentsRoutes);
+app.use('/api/reviews', reviewsRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/users', usersRoutes);
 

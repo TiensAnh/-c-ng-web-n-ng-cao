@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Button from '../components/Button';
 import ChartBars from '../components/ChartBars';
 import DataTable from '../components/DataTable';
 import Icon from '../components/Icon';
-import IconButton from '../components/IconButton';
 import SectionCard from '../components/SectionCard';
 import StatCard from '../components/StatCard';
 import StatusBadge from '../components/StatusBadge';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import { getDashboardRequest } from '../services/dashboardApiService';
+import { getBookingManagementRoute } from '../utils/routes';
 
 const INITIAL_DASHBOARD = {
   summaryCards: [],
@@ -19,6 +20,7 @@ const INITIAL_DASHBOARD = {
 };
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
   const { adminToken } = useAdminAuth();
   const [dashboardData, setDashboardData] = useState(INITIAL_DASHBOARD);
   const [chartView, setChartView] = useState('monthly');
@@ -107,7 +109,13 @@ export default function DashboardPage() {
           </div>
         )}
       >
-        <ChartBars bars={dashboardData.chartData[chartView] || INITIAL_DASHBOARD.chartData.monthly} />
+        {dashboardData.hasRevenueData ? (
+          <ChartBars bars={dashboardData.chartData[chartView] || INITIAL_DASHBOARD.chartData.monthly} />
+        ) : (
+          <div className="flex h-64 items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 text-sm text-slate-500">
+            Chua co doanh thu thanh cong trong 6 thang gan day de hien thi bieu do.
+          </div>
+        )}
       </SectionCard>
 
       <SectionCard
@@ -151,7 +159,7 @@ export default function DashboardPage() {
 
             return (
               <tr key={booking.id} className="transition-colors hover:bg-slate-50/50">
-                <td className="px-6 py-4 text-sm font-semibold text-on-surface">{booking.id}</td>
+                <td className="px-6 py-4 text-sm font-semibold text-on-surface">{booking.displayId}</td>
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
                     <div className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold ${booking.initialsClassName}`}>
@@ -167,7 +175,13 @@ export default function DashboardPage() {
                   <StatusBadge label={booking.status} tone={booking.statusTone} className="normal-case tracking-normal" />
                 </td>
                 <td className="px-6 py-4 text-right">
-                  <IconButton icon="more_vert" variant="clean" />
+                  <Button
+                    variant="ghost"
+                    className="px-0 text-xs font-bold"
+                    onClick={() => navigate(getBookingManagementRoute(booking.id))}
+                  >
+                    Manage
+                  </Button>
                 </td>
               </tr>
             );

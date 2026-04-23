@@ -214,8 +214,8 @@ function buildTourSelect(columnSet) {
       ? 'created_by_admin_id'
       : 'NULL AS created_by_admin_id',
   );
-  selectParts.push('(SELECT ROUND(AVG(reviews.rating), 1) FROM reviews WHERE reviews.tour_id = tours.id) AS average_rating');
-  selectParts.push('(SELECT COUNT(*) FROM reviews WHERE reviews.tour_id = tours.id) AS total_reviews');
+  selectParts.push("(SELECT ROUND(AVG(reviews.rating), 1) FROM reviews WHERE reviews.tour_id = tours.id AND reviews.status = 'VISIBLE') AS average_rating");
+  selectParts.push("(SELECT COUNT(*) FROM reviews WHERE reviews.tour_id = tours.id AND reviews.status = 'VISIBLE') AS total_reviews");
 
   return `SELECT ${selectParts.join(', ')} FROM tours`;
 }
