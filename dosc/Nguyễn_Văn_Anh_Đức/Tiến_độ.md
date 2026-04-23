@@ -32,6 +32,7 @@
 | 17/04/2026 | Xây dựng API thanh toán và cập nhật trạng thái booking | Hoàn thành API payment mẫu với nhiều phương thức |
 | 20/04/2026 | Xây dựng dashboard admin, thống kê, quản lý user | Hoàn thành API thống kê tổng quan và quản lý người dùng |
 | 22/04/2026 | Tách luồng admin/user, auth admin | Hoàn thành route đăng nhập admin riêng và chuẩn hóa luồng xác thực |
+| 23/04/2026 | Hoàn thiện luồng payment chờ admin xác nhận | Chuyển flow payment sang `PENDING`, chỉ xác nhận booking sau khi admin duyệt giao dịch |
 
 ---
 
@@ -41,6 +42,7 @@
 - Hoàn thành các API cốt lõi: auth, tours, bookings, payments, dashboard
 - Hoàn thành luồng xác thực user và admin riêng biệt
 - Đóng góp phần phân tích chức năng ban đầu của đề tài
+- Hoàn thiện nghiệp vụ payment theo hướng xác nhận thủ công của admin
 
 ---
 

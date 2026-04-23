@@ -31,6 +31,7 @@
 | 17/04/2026 | Thiết kế bảng payments, dữ liệu test, logic trạng thái | Hoàn thành bảng payments và đồng bộ với booking |
 | 20/04/2026 | Quản lý booking, payment, review phía admin | Hoàn thiện query và dữ liệu tổng hợp cho phần admin |
 | 22/04/2026 | Chuẩn hóa dữ liệu seed, schema, migration | Hoàn thành xử lý role, dữ liệu test và migration hỗ trợ hệ thống |
+| 23/04/2026 | Bổ sung migration và chuẩn hóa dữ liệu payment, role | Hoàn thiện migration cho flow payment pending confirmation và đồng bộ dữ liệu test |
 
 ---
 
@@ -40,6 +41,7 @@
 - Xây dựng schema phục vụ hầu hết chức năng chính của đề tài
 - Chuẩn hóa dữ liệu mẫu để hỗ trợ test và demo
 - Đóng góp trực tiếp vào các phần quản trị cần query tổng hợp
+- Bổ sung migration và chuẩn hóa dữ liệu phục vụ luồng payment mới
 
 ---
 
