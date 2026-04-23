@@ -70,6 +70,7 @@ function mapPaymentRow(payment) {
   const method = mapMethod(payment.method);
 
   return {
+    rawPaymentId: payment.id,
     id: `TXN-${payment.id}`,
     bookingId: `#BK-${payment.booking_id}`,
     customer: payment.user_name || 'Unknown user',
@@ -97,5 +98,19 @@ export async function getAdminPaymentsRequest(token) {
   return {
     ...response,
     payments: (response.payments || []).map(mapPaymentRow),
+  };
+}
+
+export async function confirmAdminPaymentRequest(paymentId, token) {
+  const response = await apiRequest(`/payments/${paymentId}/confirm`, {
+    method: 'PUT',
+    token,
+    connectionErrorMessage: 'Khong the ket noi toi backend payments.',
+    defaultErrorMessage: 'Khong the xac nhan giao dich luc nay.',
+  });
+
+  return {
+    ...response,
+    payment: response.payment ? mapPaymentRow(response.payment) : null,
   };
 }

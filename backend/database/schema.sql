@@ -77,8 +77,8 @@ CREATE TABLE payments (
     booking_id INT,
     amount DECIMAL(10,2),
     method VARCHAR(50),
-    status VARCHAR(20),
-    paid_at DATETIME,
+    status VARCHAR(20) DEFAULT 'PENDING',
+    paid_at DATETIME NULL,
     FOREIGN KEY (booking_id) REFERENCES bookings(id)
 );
 

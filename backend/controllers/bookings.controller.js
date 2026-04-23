@@ -86,7 +86,12 @@ exports.getMyBookings = async (req, res) => {
   try {
     const [rows] = await db.query(
       `SELECT b.*, t.title AS tour_title, t.location, t.image_url, t.duration, t.duration_text,
-              r.id AS review_id
+              r.id AS review_id,
+              (SELECT p.id FROM payments p WHERE p.booking_id = b.id ORDER BY p.id DESC LIMIT 1) AS payment_id,
+              (SELECT p.amount FROM payments p WHERE p.booking_id = b.id ORDER BY p.id DESC LIMIT 1) AS payment_amount,
+              (SELECT p.method FROM payments p WHERE p.booking_id = b.id ORDER BY p.id DESC LIMIT 1) AS payment_method,
+              (SELECT p.status FROM payments p WHERE p.booking_id = b.id ORDER BY p.id DESC LIMIT 1) AS payment_status,
+              (SELECT p.paid_at FROM payments p WHERE p.booking_id = b.id ORDER BY p.id DESC LIMIT 1) AS payment_paid_at
        FROM bookings b
        JOIN tours t ON t.id = b.tour_id
        LEFT JOIN reviews r ON r.booking_id = b.id
@@ -97,7 +102,18 @@ exports.getMyBookings = async (req, res) => {
 
     return res.status(200).json({
       message: 'Lay danh sach booking thanh cong.',
-      bookings: rows.map(addReviewState),
+      bookings: rows.map((booking) => addReviewState({
+        ...booking,
+        payment: booking.payment_id
+          ? {
+            id: booking.payment_id,
+            amount: booking.payment_amount,
+            method: booking.payment_method,
+            status: booking.payment_status,
+            paid_at: booking.payment_paid_at,
+          }
+          : null,
+      })),
     });
   } catch (error) {
     return res.status(500).json({ message: 'Khong the lay danh sach booking.', error: error.message });

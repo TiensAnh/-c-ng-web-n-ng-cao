@@ -4,6 +4,11 @@ import Button from '../../shared/components/Button';
 import TourExperienceLayout from '../../shared/components/TourExperienceLayout';
 import usePageTitle from '../../shared/hooks/usePageTitle';
 import { useAuth } from '../../shared/context/AuthContext';
+import {
+  BANK_TRANSFER_CONFIG,
+  buildBookingTransferReference,
+  buildTransferQrUrl,
+} from '../../shared/utils/paymentConfig';
 import { formatCurrencyVnd } from '../../shared/utils/formatters';
 import {
   createBookingRequest,
@@ -56,6 +61,7 @@ export default function TourDetailPage() {
   const [bookingForm, setBookingForm] = useState(INITIAL_BOOKING_FORM);
   const [bookingMessage, setBookingMessage] = useState('');
   const [bookingError, setBookingError] = useState('');
+  const [paymentGuide, setPaymentGuide] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -124,6 +130,7 @@ export default function TourDetailPage() {
     event.preventDefault();
     setBookingError('');
     setBookingMessage('');
+    setPaymentGuide(null);
 
     if (!isAuthenticated || !token) {
       setBookingError('Ban can dang nhap truoc khi dat tour.');
@@ -157,8 +164,14 @@ export default function TourDetailPage() {
         }, token);
 
         setBookingMessage(
-          `${bookingResponse.message || 'Dat tour thanh cong.'} ${paymentResponse.message || 'Thanh toan thanh cong.'}`,
+          `${bookingResponse.message || 'Dat tour thanh cong.'} ${paymentResponse.message || 'Yeu cau thanh toan da duoc tao.'}`,
         );
+
+        setPaymentGuide({
+          bookingId,
+          method: bookingForm.paymentMethod,
+          amount: bookingResponse.booking?.total_price || totalEstimate,
+        });
       } else {
         setBookingMessage(
           `${bookingResponse.message || 'Dat tour thanh cong.'} Ban co the thanh toan sau trong muc Booking cua toi.`,
@@ -289,8 +302,35 @@ export default function TourDetailPage() {
           </div>
         ) : null}
 
+        {bookingForm.paymentTiming === 'NOW' ? (
+          <div className="tour-booking-form__hint">
+            Giao dich se duoc tao o trang thai cho xac nhan. Admin se xac nhan thanh toan truoc khi booking chuyen sang da xac nhan.
+          </div>
+        ) : null}
+
         {bookingError ? <div className="tour-booking-form__message tour-booking-form__message--error">{bookingError}</div> : null}
         {bookingMessage ? <div className="tour-booking-form__message tour-booking-form__message--success">{bookingMessage}</div> : null}
+
+        {paymentGuide?.method === 'BANK_TRANSFER' ? (
+          <div className="tour-booking-form__message">
+            <strong>Thong tin chuyen khoan</strong>
+            <div>Ngân hàng: {BANK_TRANSFER_CONFIG.bankName}</div>
+            <div>So tai khoan: {BANK_TRANSFER_CONFIG.accountNumber}</div>
+            <div>Chu tai khoan: {BANK_TRANSFER_CONFIG.accountName}</div>
+            <div>So tien: {formatCurrencyVnd(paymentGuide.amount)}d</div>
+            <div>Noi dung: {buildBookingTransferReference(paymentGuide.bookingId)}</div>
+            <div style={{ marginTop: '12px' }}>
+              <img
+                src={buildTransferQrUrl({
+                  bookingId: paymentGuide.bookingId,
+                  amount: paymentGuide.amount,
+                })}
+                alt="QR chuyen khoan"
+                style={{ width: '220px', maxWidth: '100%', borderRadius: '16px', background: '#fff', padding: '8px' }}
+              />
+            </div>
+          </div>
+        ) : null}
 
         <div className="tour-spotlight__panel-actions">
           <Button type="submit" disabled={isSubmitting}>

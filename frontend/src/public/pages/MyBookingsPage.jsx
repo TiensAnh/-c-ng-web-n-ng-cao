@@ -3,6 +3,11 @@ import Button from '../../shared/components/Button';
 import usePageTitle from '../../shared/hooks/usePageTitle';
 import { useAuth } from '../../shared/context/AuthContext';
 import {
+  BANK_TRANSFER_CONFIG,
+  buildBookingTransferReference,
+  buildTransferQrUrl,
+} from '../../shared/utils/paymentConfig';
+import {
   cancelMyBookingRequest,
   createPaymentRequest,
   createReviewRequest,
@@ -24,6 +29,22 @@ function renderStatusLabel(status) {
   }
 
   return 'Dang cho xu ly';
+}
+
+function renderPaymentStatusLabel(status) {
+  if (status === 'SUCCESS') {
+    return 'Da xac nhan';
+  }
+
+  if (status === 'FAILED') {
+    return 'That bai';
+  }
+
+  if (status === 'CANCELLED') {
+    return 'Da huy';
+  }
+
+  return 'Dang cho xac nhan';
 }
 
 export default function MyBookingsPage() {
@@ -148,8 +169,8 @@ export default function MyBookingsPage() {
         booking.id === bookingId
           ? {
               ...booking,
-              status: 'CONFIRMED',
-              statusTone: 'success',
+              status: 'PENDING',
+              statusTone: 'pending',
               payment: response.payment,
             }
           : booking
@@ -159,24 +180,26 @@ export default function MyBookingsPage() {
         currentBooking?.id === bookingId
           ? {
               ...currentBooking,
-              status: 'CONFIRMED',
-              statusTone: 'success',
+              status: 'PENDING',
+              statusTone: 'pending',
               payment: {
                 ...response.payment,
                 amountText: currentBooking.totalPriceText,
-                paidAtText: new Intl.DateTimeFormat('vi-VN', {
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                }).format(new Date(response.payment.paid_at)),
+                paidAtText: response.payment.paid_at
+                  ? new Intl.DateTimeFormat('vi-VN', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  }).format(new Date(response.payment.paid_at))
+                  : 'Dang cap nhat',
               },
             }
           : currentBooking
       ));
 
-      setActionMessage(response.message || 'Thanh toan thanh cong.');
+      setActionMessage(response.message || 'Da tao yeu cau thanh toan.');
     } catch (paymentError) {
       setError(paymentError.message || 'Khong the thanh toan booking luc nay.');
     } finally {
@@ -283,10 +306,14 @@ export default function MyBookingsPage() {
                       Xem chi tiet
                     </Button>
                     <Button
-                      disabled={isPaying || booking.status !== 'PENDING'}
+                      disabled={isPaying || booking.status !== 'PENDING' || booking.payment?.status === 'PENDING'}
                       onClick={() => handlePayBooking(booking.id)}
                     >
-                      {isPaying && selectedBooking?.id === booking.id ? 'Dang thanh toan...' : 'Thanh toan'}
+                      {booking.payment?.status === 'PENDING'
+                        ? 'Cho xac nhan'
+                        : isPaying && selectedBooking?.id === booking.id
+                          ? 'Dang thanh toan...'
+                          : 'Thanh toan'}
                     </Button>
                     <Button
                       variant="ghost"
@@ -346,6 +373,10 @@ export default function MyBookingsPage() {
                 <div className="account-page__payment-box">
                   <p className="account-page__payment-title">Thong tin thanh toan</p>
                   <div className="account-page__payment-row">
+                    <span>Trang thai</span>
+                    <strong>{renderPaymentStatusLabel(selectedBooking.payment.status)}</strong>
+                  </div>
+                  <div className="account-page__payment-row">
                     <span>Phuong thuc</span>
                     <strong>{selectedBooking.payment.method}</strong>
                   </div>
@@ -357,6 +388,41 @@ export default function MyBookingsPage() {
                     <span>Thoi gian</span>
                     <strong>{selectedBooking.payment.paidAtText}</strong>
                   </div>
+
+                  {selectedBooking.payment.method === 'BANK_TRANSFER' && selectedBooking.payment.status === 'PENDING' ? (
+                    <>
+                      <div className="account-page__payment-row">
+                        <span>Ngân hàng</span>
+                        <strong>{BANK_TRANSFER_CONFIG.bankName}</strong>
+                      </div>
+                      <div className="account-page__payment-row">
+                        <span>So tai khoan</span>
+                        <strong>{BANK_TRANSFER_CONFIG.accountNumber}</strong>
+                      </div>
+                      <div className="account-page__payment-row">
+                        <span>Chu tai khoan</span>
+                        <strong>{BANK_TRANSFER_CONFIG.accountName}</strong>
+                      </div>
+                      <div className="account-page__payment-row">
+                        <span>So tien</span>
+                        <strong>{selectedBooking.totalPriceText}</strong>
+                      </div>
+                      <div className="account-page__payment-row">
+                        <span>Noi dung CK</span>
+                        <strong>{buildBookingTransferReference(selectedBooking.id)}</strong>
+                      </div>
+                      <div style={{ marginTop: '16px' }}>
+                        <img
+                          src={buildTransferQrUrl({
+                            bookingId: selectedBooking.id,
+                            amount: selectedBooking.total_price,
+                          })}
+                          alt="QR chuyen khoan"
+                          style={{ width: '220px', maxWidth: '100%', borderRadius: '16px', background: '#fff', padding: '8px' }}
+                        />
+                      </div>
+                    </>
+                  ) : null}
                 </div>
               ) : (
                 <>

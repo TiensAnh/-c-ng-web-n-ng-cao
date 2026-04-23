@@ -9,7 +9,7 @@ import StatCard from '../components/StatCard';
 import StatusBadge from '../components/StatusBadge';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useAdminAuth } from '../context/AdminAuthContext';
-import { getAdminPaymentsRequest } from '../services/paymentsApiService';
+import { confirmAdminPaymentRequest, getAdminPaymentsRequest } from '../services/paymentsApiService';
 import { normalizeText } from '../utils/formatters';
 
 function formatCurrency(value) {
@@ -25,6 +25,8 @@ export default function PaymentsPage() {
   const [transactions, setTransactions] = useState([]);
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [actionId, setActionId] = useState('');
+  const [actionMessage, setActionMessage] = useState('');
   const [loadError, setLoadError] = useState('');
 
   useDocumentTitle('Payments & Transactions | ADN Travel Admin');
@@ -35,6 +37,7 @@ export default function PaymentsPage() {
     const loadPayments = async () => {
       setIsLoading(true);
       setLoadError('');
+      setActionMessage('');
 
       try {
         const response = await getAdminPaymentsRequest(adminToken);
@@ -66,6 +69,40 @@ export default function PaymentsPage() {
       isMounted = false;
     };
   }, [adminToken]);
+
+  const handleConfirmPayment = async (transaction) => {
+    if (!adminToken || !transaction?.rawPaymentId) {
+      return;
+    }
+
+    setActionId(transaction.rawPaymentId);
+    setLoadError('');
+    setActionMessage('');
+
+    try {
+      const response = await confirmAdminPaymentRequest(transaction.rawPaymentId, adminToken);
+
+      setTransactions((currentTransactions) => currentTransactions.map((currentTransaction) => (
+        currentTransaction.rawPaymentId === transaction.rawPaymentId
+          ? {
+              ...currentTransaction,
+              ...(response.payment || {}),
+              bookingId: currentTransaction.bookingId,
+              customer: currentTransaction.customer,
+              initials: currentTransaction.initials,
+              initialsClassName: currentTransaction.initialsClassName,
+              tourTitle: currentTransaction.tourTitle,
+            }
+          : currentTransaction
+      )));
+
+      setActionMessage(response.message || 'Da xac nhan giao dich thanh cong.');
+    } catch (error) {
+      setLoadError(error.message || 'Khong the xac nhan giao dich luc nay.');
+    } finally {
+      setActionId('');
+    }
+  };
 
   const filteredItems = useMemo(() => {
     if (!query.trim()) {
@@ -107,6 +144,12 @@ export default function PaymentsPage() {
 
   return (
     <div className="admin-page-shell">
+      {actionMessage ? (
+        <div className="mb-6 rounded-2xl border border-emerald-100 bg-emerald-50 px-5 py-4 text-sm text-emerald-700">
+          {actionMessage}
+        </div>
+      ) : null}
+
       {loadError ? (
         <div className="mb-6 rounded-2xl border border-rose-100 bg-rose-50 px-5 py-4 text-sm text-rose-600">
           {loadError}
@@ -240,7 +283,18 @@ export default function PaymentsPage() {
                   <StatusBadge label={transaction.status} tone={transaction.statusTone} showDot />
                 </td>
                 <td className="px-8 py-5 text-right">
-                  <IconButton icon="more_vert" variant="clean" />
+                  {transaction.status === 'PENDING' ? (
+                    <Button
+                      variant="outline"
+                      icon="check_circle"
+                      disabled={actionId === transaction.rawPaymentId}
+                      onClick={() => handleConfirmPayment(transaction)}
+                    >
+                      {actionId === transaction.rawPaymentId ? 'Dang xac nhan...' : 'Xac nhan'}
+                    </Button>
+                  ) : (
+                    <IconButton icon="check_circle" variant="clean" disabled />
+                  )}
                 </td>
               </tr>
             );
