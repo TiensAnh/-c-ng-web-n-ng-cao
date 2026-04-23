@@ -1,6 +1,8 @@
+const jwt = require('jsonwebtoken');
 const db = require('../config/db');
 
 const ALLOWED_METHODS = ['CASH', 'BANK_TRANSFER', 'MOMO', 'VNPAY'];
+const ONLINE_PAYMENT_METHODS = ['MOMO', 'VNPAY'];
 
 function normalizeMethod(method = '') {
   return String(method).trim().toUpperCase();
@@ -16,10 +18,116 @@ function buildPendingPaymentMessage(method) {
   }
 
   if (method === 'MOMO' || method === 'VNPAY') {
-    return 'Da tao yeu cau thanh toan. Hien he thong dang cho admin xac nhan giao dich.';
+    return 'Dang chuyen huong den cong thanh toan. Vui long hoan tat giao dich de quay lai website.';
   }
 
   return 'Da tao yeu cau thanh toan thanh cong.';
+}
+
+function isOnlineMethod(method) {
+  return ONLINE_PAYMENT_METHODS.includes(method);
+}
+
+function getFrontendBookingUrl(searchParams = {}) {
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  const url = new URL('/my-bookings', frontendUrl);
+
+  Object.entries(searchParams).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      url.searchParams.set(key, String(value));
+    }
+  });
+
+  return url.toString();
+}
+
+function buildCheckoutUrl(req, paymentId, userId) {
+  if (!process.env.JWT_SECRET) {
+    throw new Error('Server chua duoc cau hinh JWT_SECRET.');
+  }
+
+  const token = jwt.sign(
+    {
+      type: 'payment_checkout',
+      paymentId,
+      userId,
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: '30m' },
+  );
+
+  return `${req.protocol}://${req.get('host')}/api/payments/checkout?token=${encodeURIComponent(token)}`;
+}
+
+function escapeHtml(value = '') {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+async function getPaymentByCheckoutToken(token) {
+  if (!process.env.JWT_SECRET) {
+    throw new Error('Server chua duoc cau hinh JWT_SECRET.');
+  }
+
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+  if (decoded.type !== 'payment_checkout' || !decoded.paymentId || !decoded.userId) {
+    throw new Error('Token thanh toan khong hop le.');
+  }
+
+  const [rows] = await db.query(
+    `SELECT p.id, p.booking_id, p.amount, p.method, p.status, p.paid_at,
+            b.user_id, b.status AS booking_status,
+            t.title AS tour_title
+     FROM payments p
+     JOIN bookings b ON b.id = p.booking_id
+     JOIN tours t ON t.id = b.tour_id
+     WHERE p.id = ? AND b.user_id = ? LIMIT 1`,
+    [decoded.paymentId, decoded.userId],
+  );
+
+  if (rows.length === 0) {
+    throw new Error('Khong tim thay giao dich thanh toan.');
+  }
+
+  return rows[0];
+}
+
+async function updatePaymentResult(payment, result) {
+  if (payment.status === 'SUCCESS' || payment.status === 'FAILED') {
+    return payment.status;
+  }
+
+  if (payment.booking_status === 'CANCELLED') {
+    return 'CANCELLED';
+  }
+
+  if (result === 'success') {
+    const paidAt = new Date();
+
+    await db.query(
+      "UPDATE payments SET status = 'SUCCESS', paid_at = ? WHERE id = ?",
+      [paidAt, payment.id],
+    );
+
+    await db.query(
+      "UPDATE bookings SET status = 'CONFIRMED' WHERE id = ? AND status = 'PENDING'",
+      [payment.booking_id],
+    );
+
+    return 'SUCCESS';
+  }
+
+  await db.query(
+    "UPDATE payments SET status = 'FAILED', paid_at = NULL WHERE id = ?",
+    [payment.id],
+  );
+
+  return 'FAILED';
 }
 
 // POST /api/payments
@@ -87,19 +195,141 @@ exports.createPayment = async (req, res) => {
       [booking_id, booking.total_price, normalizedMethod, 'PENDING', null],
     );
 
+    const payment = {
+      id: result.insertId,
+      booking_id: Number(booking_id),
+      amount: booking.total_price,
+      method: normalizedMethod,
+      status: 'PENDING',
+      paid_at: null,
+    };
+
     return res.status(201).json({
       message: buildPendingPaymentMessage(normalizedMethod),
-      payment: {
-        id: result.insertId,
-        booking_id: Number(booking_id),
-        amount: booking.total_price,
-        method: normalizedMethod,
-        status: 'PENDING',
-        paid_at: null,
-      },
+      payment,
+      checkout_url: isOnlineMethod(normalizedMethod)
+        ? buildCheckoutUrl(req, payment.id, userId)
+        : null,
     });
   } catch (error) {
     return res.status(500).json({ message: 'Khong the xu ly thanh toan luc nay.', error: error.message });
+  }
+};
+
+// GET /api/payments/checkout?token=...
+// Trang thanh toan mo phong cho MoMo / VNPay
+exports.renderPaymentCheckout = async (req, res) => {
+  const { token } = req.query;
+
+  if (!token) {
+    return res.status(400).send('Thieu token thanh toan.');
+  }
+
+  try {
+    const payment = await getPaymentByCheckoutToken(token);
+
+    if (!isOnlineMethod(payment.method)) {
+      return res.redirect(getFrontendBookingUrl({
+        payment: 'failed',
+        bookingId: payment.booking_id,
+        reason: 'invalid_method',
+      }));
+    }
+
+    const successUrl = `/api/payments/complete?token=${encodeURIComponent(token)}&result=success`;
+    const failedUrl = `/api/payments/complete?token=${encodeURIComponent(token)}&result=failed`;
+    const statusText = payment.status === 'SUCCESS'
+      ? 'Giao dich nay da thanh toan thanh cong.'
+      : payment.status === 'FAILED'
+        ? 'Giao dich nay da that bai. Ban co the thu lai.'
+        : 'Hoan tat giao dich de quay lai website.';
+
+    return res.status(200).send(`<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Thanh toan ${escapeHtml(payment.method)}</title>
+    <style>
+      body { margin: 0; font-family: Arial, sans-serif; background: #f4f7fb; color: #17212b; }
+      .wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+      .card { width: 100%; max-width: 560px; background: #fff; border-radius: 20px; padding: 32px; box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08); }
+      .badge { display: inline-block; padding: 6px 12px; border-radius: 999px; background: #e0ebff; color: #1d4ed8; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+      h1 { margin: 16px 0 8px; font-size: 28px; }
+      p { margin: 0 0 16px; line-height: 1.6; color: #475569; }
+      dl { margin: 24px 0; }
+      .row { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid #e2e8f0; }
+      .row:last-child { border-bottom: none; }
+      dt { color: #64748b; }
+      dd { margin: 0; font-weight: 700; }
+      .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
+      .btn { flex: 1; min-width: 180px; text-align: center; padding: 14px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; }
+      .btn-primary { background: #2563eb; color: #fff; }
+      .btn-secondary { background: #e2e8f0; color: #0f172a; }
+      .note { margin-top: 16px; font-size: 14px; color: #64748b; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <span class="badge">${escapeHtml(payment.method)}</span>
+        <h1>Thanh toan booking #BK-${escapeHtml(payment.booking_id)}</h1>
+        <p>${escapeHtml(statusText)}</p>
+        <dl>
+          <div class="row">
+            <dt>Tour</dt>
+            <dd>${escapeHtml(payment.tour_title)}</dd>
+          </div>
+          <div class="row">
+            <dt>Ma giao dich</dt>
+            <dd>TXN-${escapeHtml(payment.id)}</dd>
+          </div>
+          <div class="row">
+            <dt>So tien</dt>
+            <dd>${Number(payment.amount || 0).toLocaleString('vi-VN')}d</dd>
+          </div>
+        </dl>
+        <div class="actions">
+          <a class="btn btn-primary" href="${successUrl}">Thanh toan thanh cong</a>
+          <a class="btn btn-secondary" href="${failedUrl}">Thanh toan that bai</a>
+        </div>
+        <p class="note">Day la cong thanh toan mo phong de hoan thien luong redirect va thong bao tren website.</p>
+      </div>
+    </div>
+  </body>
+</html>`);
+  } catch (error) {
+    return res.status(400).send(error.message || 'Khong the mo trang thanh toan.');
+  }
+};
+
+// GET /api/payments/complete?token=...&result=success|failed
+// Hoan tat callback thanh toan va redirect ve frontend
+exports.completePaymentCheckout = async (req, res) => {
+  const { token, result } = req.query;
+
+  if (!token || !result) {
+    return res.redirect(getFrontendBookingUrl({
+      payment: 'failed',
+      reason: 'missing_params',
+    }));
+  }
+
+  try {
+    const payment = await getPaymentByCheckoutToken(token);
+    const finalStatus = await updatePaymentResult(payment, result === 'success' ? 'success' : 'failed');
+
+    return res.redirect(getFrontendBookingUrl({
+      payment: finalStatus === 'SUCCESS' ? 'success' : 'failed',
+      bookingId: payment.booking_id,
+      paymentId: payment.id,
+      method: payment.method,
+    }));
+  } catch (error) {
+    return res.redirect(getFrontendBookingUrl({
+      payment: 'failed',
+      reason: 'invalid_token',
+    }));
   }
 };
 

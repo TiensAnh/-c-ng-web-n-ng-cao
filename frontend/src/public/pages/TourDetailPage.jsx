@@ -163,6 +163,11 @@ export default function TourDetailPage() {
           method: bookingForm.paymentMethod,
         }, token);
 
+        if (paymentResponse.checkout_url) {
+          window.location.assign(paymentResponse.checkout_url);
+          return;
+        }
+
         setBookingMessage(
           `${bookingResponse.message || 'Dat tour thanh cong.'} ${paymentResponse.message || 'Yeu cau thanh toan da duoc tao.'}`,
         );

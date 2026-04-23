@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Button from '../../shared/components/Button';
 import usePageTitle from '../../shared/hooks/usePageTitle';
 import { useAuth } from '../../shared/context/AuthContext';
@@ -48,6 +49,9 @@ function renderPaymentStatusLabel(status) {
 }
 
 export default function MyBookingsPage() {
+  const PAYMENT_STATUS_POLL_INTERVAL = 8000;
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { isAuthenticated, token } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [selectedBooking, setSelectedBooking] = useState(null);
@@ -61,6 +65,33 @@ export default function MyBookingsPage() {
   const [actionMessage, setActionMessage] = useState('');
 
   usePageTitle('ADN Travel | Booking cua toi');
+
+  useEffect(() => {
+    const paymentStatus = searchParams.get('payment');
+    const bookingId = searchParams.get('bookingId');
+
+    if (!paymentStatus) {
+      return;
+    }
+
+    if (paymentStatus === 'success') {
+      setActionMessage(
+        bookingId
+          ? `Ban da thanh toan thanh cong cho booking BK-${bookingId}.`
+          : 'Ban da thanh toan thanh cong.',
+      );
+      setError('');
+    } else {
+      setError(
+        bookingId
+          ? `Thanh toan cho booking BK-${bookingId} khong thanh cong. Vui long thu lai.`
+          : 'Thanh toan khong thanh cong. Vui long thu lai.',
+      );
+      setActionMessage('');
+    }
+
+    navigate('/my-bookings', { replace: true });
+  }, [navigate, searchParams]);
 
   useEffect(() => {
     let isMounted = true;
@@ -104,6 +135,60 @@ export default function MyBookingsPage() {
       isMounted = false;
     };
   }, [token]);
+
+  useEffect(() => {
+    if (!token) {
+      return undefined;
+    }
+
+    const hasPendingPayment = bookings.some((booking) => booking.payment?.status === 'PENDING')
+      || selectedBooking?.payment?.status === 'PENDING';
+
+    if (!hasPendingPayment) {
+      return undefined;
+    }
+
+    const intervalId = window.setInterval(async () => {
+      try {
+        const previousSelectedPaymentStatus = selectedBooking?.payment?.status || null;
+        const previousSelectedBookingStatus = selectedBooking?.status || null;
+        const bookingsResponse = await getMyBookingsRequest(token);
+        const nextBookings = bookingsResponse.bookings || [];
+
+        setBookings(nextBookings);
+
+        if (selectedBooking?.id) {
+          const detailResponse = await getMyBookingDetailRequest(selectedBooking.id, token);
+          const nextSelectedBooking = detailResponse.booking;
+
+          setSelectedBooking(nextSelectedBooking);
+
+          if (
+            previousSelectedPaymentStatus === 'PENDING'
+            && nextSelectedBooking?.payment?.status === 'SUCCESS'
+          ) {
+            setActionMessage(`Ban da thanh toan thanh cong cho booking BK-${selectedBooking.id}.`);
+            setError('');
+          }
+
+          if (
+            previousSelectedBookingStatus === 'PENDING'
+            && nextSelectedBooking?.status === 'CONFIRMED'
+            && nextSelectedBooking?.payment?.status === 'SUCCESS'
+          ) {
+            setActionMessage(`Booking BK-${selectedBooking.id} da duoc xac nhan sau khi nhan thanh toan.`);
+            setError('');
+          }
+        }
+      } catch (syncError) {
+        // Bo qua loi polling de khong lam gian doan thao tac hien tai cua user.
+      }
+    }, PAYMENT_STATUS_POLL_INTERVAL);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [PAYMENT_STATUS_POLL_INTERVAL, bookings, selectedBooking, token]);
 
   const handleViewDetail = async (bookingId) => {
     if (!token) {
@@ -165,6 +250,11 @@ export default function MyBookingsPage() {
         method: paymentMethod,
       }, token);
 
+      if (response.checkout_url) {
+        window.location.assign(response.checkout_url);
+        return;
+      }
+
       setBookings((currentBookings) => currentBookings.map((booking) => (
         booking.id === bookingId
           ? {
@@ -199,7 +289,16 @@ export default function MyBookingsPage() {
           : currentBooking
       ));
 
-      setActionMessage(response.message || 'Da tao yeu cau thanh toan.');
+      if (selectedBooking?.id !== bookingId) {
+        const detailResponse = await getMyBookingDetailRequest(bookingId, token);
+        setSelectedBooking(detailResponse.booking);
+      }
+
+      if (paymentMethod === 'BANK_TRANSFER') {
+        setActionMessage('Da tao QR chuyen khoan. Sau khi admin xac nhan tien vao tai khoan, trang nay se tu dong cap nhat.');
+      } else {
+        setActionMessage(response.message || 'Da tao yeu cau thanh toan.');
+      }
     } catch (paymentError) {
       setError(paymentError.message || 'Khong the thanh toan booking luc nay.');
     } finally {
