@@ -32,6 +32,7 @@
 | 17/04/2026 | Xây dựng giao diện thanh toán và lịch sử giao dịch | Hoàn thành giao diện cơ bản, tiếp tục tối ưu thông báo kết quả |
 | 20/04/2026 | Xây dựng giao diện admin: dashboard, users, bookings, tours | Đã kết nối phần lớn API quản trị và khung UI admin |
 | 22/04/2026 | Tích hợp frontend admin và kiểm thử tổng thể | Tiếp tục hoàn thiện luồng cuối, test hệ thống và chuẩn bị demo |
+| 23/04/2026 | Tích hợp UI chuyển khoản, QR thanh toán và cập nhật tài liệu tiến độ | Hoàn thiện giao diện thanh toán chuyển khoản/QR và đồng bộ tài liệu với code hiện tại |
 
 ---
 
@@ -41,6 +42,7 @@
 - Hoàn thành điều hướng, layout và kết nối phần lớn API
 - Xây dựng các màn hình chính: Home, tours, auth, booking, admin
 - Đảm nhiệm phần tích hợp và kiểm thử giao diện tổng thể
+- Bổ sung giao diện chuyển khoản ngân hàng, QR thanh toán và đồng bộ tiến độ tài liệu
 
 ---
 
