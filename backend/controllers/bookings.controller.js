@@ -210,7 +210,10 @@ exports.cancelMyBooking = async (req, res) => {
 // GET /api/bookings
 // Admin lấy toàn bộ danh sách booking có thể filter theo status
 exports.getAllBookings = async (req, res) => {
-  const { status, tour_id } = req.query;
+  const { status, tour_id, search } = req.query;
+  const page = Math.max(Number.parseInt(req.query.page, 10) || 1, 1);
+  const limit = Math.min(Math.max(Number.parseInt(req.query.limit, 10) || 10, 1), 100);
+  const offset = (page - 1) * limit;
 
   try {
     const whereClauses = [];
@@ -226,7 +229,40 @@ exports.getAllBookings = async (req, res) => {
       params.push(Number(tour_id));
     }
 
+    if (search && String(search).trim()) {
+      const normalizedSearch = String(search).trim();
+      const bookingIdMatch = normalizedSearch.match(/\d+/);
+
+      whereClauses.push(`(
+        CAST(b.id AS CHAR) LIKE ?
+        OR u.name LIKE ?
+        OR u.email LIKE ?
+        OR u.phone LIKE ?
+        OR t.title LIKE ?
+      )`);
+
+      const searchPattern = `%${normalizedSearch}%`;
+      params.push(
+        bookingIdMatch ? `%${bookingIdMatch[0]}%` : searchPattern,
+        searchPattern,
+        searchPattern,
+        searchPattern,
+        searchPattern,
+      );
+    }
+
     const whereSql = whereClauses.length ? `WHERE ${whereClauses.join(' AND ')}` : '';
+
+    const [countRows] = await db.query(
+      `SELECT COUNT(*) AS total
+       FROM bookings b
+       JOIN users u ON u.id = b.user_id
+       JOIN tours t ON t.id = b.tour_id
+       ${whereSql}`,
+      params,
+    );
+
+    const total = Number(countRows[0]?.total || 0);
 
     const [rows] = await db.query(
       `SELECT b.*,
@@ -236,13 +272,17 @@ exports.getAllBookings = async (req, res) => {
        JOIN users u ON u.id = b.user_id
        JOIN tours t ON t.id = b.tour_id
        ${whereSql}
-       ORDER BY b.created_at DESC`,
-      params,
+       ORDER BY b.created_at DESC
+       LIMIT ? OFFSET ?`,
+      [...params, limit, offset],
     );
 
     return res.status(200).json({
       message: 'Lay danh sach booking thanh cong.',
-      total: rows.length,
+      total,
+      page,
+      limit,
+      total_pages: total === 0 ? 1 : Math.ceil(total / limit),
       bookings: rows,
     });
   } catch (error) {

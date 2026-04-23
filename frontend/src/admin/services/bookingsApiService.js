@@ -72,6 +72,18 @@ export async function getAdminBookingsRequest(token, filters = {}) {
     query.set('tour_id', filters.tourId);
   }
 
+  if (filters.search) {
+    query.set('search', filters.search);
+  }
+
+  if (filters.page) {
+    query.set('page', String(filters.page));
+  }
+
+  if (filters.limit) {
+    query.set('limit', String(filters.limit));
+  }
+
   const queryString = query.toString();
   const response = await apiRequest(`/bookings${queryString ? `?${queryString}` : ''}`, {
     method: 'GET',
@@ -83,6 +95,12 @@ export async function getAdminBookingsRequest(token, filters = {}) {
   return {
     ...response,
     bookings: (response.bookings || []).map(mapBookingRow),
+    pagination: {
+      page: Number(response.page || filters.page || 1),
+      limit: Number(response.limit || filters.limit || 10),
+      totalItems: Number(response.total || 0),
+      totalPages: Number(response.total_pages || 1),
+    },
   };
 }
 

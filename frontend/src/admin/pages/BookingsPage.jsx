@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Avatar from '../components/Avatar';
 import Button from '../components/Button';
@@ -16,7 +16,6 @@ import {
   getAdminBookingsRequest,
   updateAdminBookingStatusRequest,
 } from '../services/bookingsApiService';
-import { normalizeText } from '../utils/formatters';
 
 function formatCount(value) {
   return new Intl.NumberFormat('en-US').format(value);
@@ -31,14 +30,23 @@ function formatCurrency(value) {
 }
 
 export default function BookingsPage() {
+  const PAGE_SIZE = 10;
   const location = useLocation();
   const { adminToken } = useAdminAuth();
   const [bookingRows, setBookingRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('ALL');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: PAGE_SIZE,
+    totalItems: 0,
+    totalPages: 1,
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [isUpdatingId, setIsUpdatingId] = useState(null);
+  const [reloadKey, setReloadKey] = useState(0);
   const bookingIdFromQuery = new URLSearchParams(location.search).get('bookingId');
 
   useDocumentTitle('Bookings Management');
@@ -49,10 +57,12 @@ export default function BookingsPage() {
     }
 
     setSearchQuery(`#BK-${bookingIdFromQuery}`);
+    setCurrentPage(1);
   }, [bookingIdFromQuery]);
 
   useEffect(() => {
     let isMounted = true;
+    const normalizedSearch = searchQuery.trim();
 
     const loadBookings = async () => {
       setIsLoading(true);
@@ -61,6 +71,9 @@ export default function BookingsPage() {
       try {
         const response = await getAdminBookingsRequest(adminToken, {
           status: selectedStatus === 'ALL' ? undefined : selectedStatus,
+          search: normalizedSearch || undefined,
+          page: currentPage,
+          limit: PAGE_SIZE,
         });
 
         if (!isMounted) {
@@ -68,12 +81,24 @@ export default function BookingsPage() {
         }
 
         setBookingRows(response.bookings || []);
+        setPagination(response.pagination || {
+          page: 1,
+          limit: PAGE_SIZE,
+          totalItems: 0,
+          totalPages: 1,
+        });
       } catch (error) {
         if (!isMounted) {
           return;
         }
 
         setBookingRows([]);
+        setPagination({
+          page: 1,
+          limit: PAGE_SIZE,
+          totalItems: 0,
+          totalPages: 1,
+        });
         setLoadError(error.message || 'Khong the tai bookings luc nay.');
       } finally {
         if (isMounted) {
@@ -89,35 +114,21 @@ export default function BookingsPage() {
     return () => {
       isMounted = false;
     };
-  }, [adminToken, selectedStatus]);
-
-  const visibleBookings = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return bookingRows;
-    }
-
-    const normalizedQuery = normalizeText(searchQuery);
-
-    return bookingRows.filter((booking) => (
-      normalizeText(
-        `${booking.displayId} ${booking.customer} ${booking.email} ${booking.tour} ${booking.status}`,
-      ).includes(normalizedQuery)
-    ));
-  }, [bookingRows, searchQuery]);
+  }, [PAGE_SIZE, adminToken, currentPage, reloadKey, searchQuery, selectedStatus]);
 
   const bookingStats = [
     {
       id: 'total',
       label: 'Total Bookings',
-      value: formatCount(bookingRows.length),
-      meta: 'Live from backend',
-      metaClassName: 'text-green-600',
+      value: formatCount(pagination.totalItems),
+      meta: 'Matched results',
+      metaClassName: 'text-primary',
     },
     {
       id: 'pending',
       label: 'Pending',
       value: formatCount(bookingRows.filter((booking) => booking.status === 'PENDING').length),
-      meta: 'Requires action',
+      meta: 'On current page',
       metaClassName: 'text-tertiary',
     },
     {
@@ -126,14 +137,14 @@ export default function BookingsPage() {
       value: formatCount(
         bookingRows.filter((booking) => booking.status === 'CONFIRMED' || booking.status === 'COMPLETED').length,
       ),
-      meta: 'Confirmed or completed',
+      meta: 'On current page',
       metaClassName: 'text-slate-400',
     },
     {
       id: 'revenue',
       label: 'Revenue',
       value: formatCurrency(bookingRows.reduce((sum, booking) => sum + booking.rawTotal, 0)),
-      meta: 'Visible rows',
+      meta: 'Current page',
       metaClassName: 'text-primary',
     },
   ];
@@ -146,25 +157,24 @@ export default function BookingsPage() {
 
     try {
       await updateAdminBookingStatusRequest(bookingId, nextStatus, adminToken);
-      setBookingRows((currentRows) => currentRows.map((booking) => (
-        booking.id === bookingId
-          ? {
-            ...booking,
-            status: nextStatus,
-            statusTone: nextStatus === 'CANCELLED'
-              ? 'blocked'
-              : nextStatus === 'CONFIRMED' || nextStatus === 'COMPLETED'
-                ? 'success'
-                : 'pending',
-          }
-          : booking
-      )));
+      setReloadKey((currentValue) => currentValue + 1);
     } catch (error) {
       setLoadError(error.message || 'Khong the cap nhat trang thai booking.');
     } finally {
       setIsUpdatingId(null);
     }
   };
+
+  const totalPages = Math.max(pagination.totalPages || 1, 1);
+  const paginationStart = pagination.totalItems === 0 ? 0 : (pagination.page - 1) * pagination.limit + 1;
+  const paginationEnd = pagination.totalItems === 0
+    ? 0
+    : Math.min(pagination.page * pagination.limit, pagination.totalItems);
+  const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1)
+    .filter((page) => page === 1 || page === totalPages || Math.abs(page - pagination.page) <= 1);
+  const compactPageNumbers = pageNumbers.filter((page, index, pages) => (
+    index === 0 || page !== pages[index - 1]
+  ));
 
   return (
     <div className="admin-page-shell">
@@ -201,7 +211,10 @@ export default function BookingsPage() {
         <div className="flex flex-1 flex-wrap items-center gap-4">
           <SearchInput
             value={searchQuery}
-            onChange={setSearchQuery}
+            onChange={(value) => {
+              setSearchQuery(value);
+              setCurrentPage(1);
+            }}
             placeholder="Search by ID, name or tour..."
             containerClassName="min-w-[280px] flex-1 max-w-md"
             className="bg-surface-container-lowest"
@@ -209,7 +222,10 @@ export default function BookingsPage() {
           <div className="relative rounded-lg bg-surface-container-lowest px-4">
             <select
               value={selectedStatus}
-              onChange={(event) => setSelectedStatus(event.target.value)}
+              onChange={(event) => {
+                setSelectedStatus(event.target.value);
+                setCurrentPage(1);
+              }}
               className="appearance-none bg-transparent py-2 pr-8 text-sm"
             >
               {statusOptions.map((status) => (
@@ -222,7 +238,7 @@ export default function BookingsPage() {
           </div>
         </div>
         <div className="text-xs font-medium text-slate-500">
-          Showing {visibleBookings.length} rows
+          Showing {bookingRows.length} rows
         </div>
       </section>
 
@@ -231,20 +247,49 @@ export default function BookingsPage() {
         footer={(
           <div className="flex items-center justify-between bg-surface-container-low px-6 py-4">
             <p className="text-xs font-medium text-slate-500">
-              Showing 1 to {visibleBookings.length} of {bookingRows.length} entries
+              Showing {paginationStart} to {paginationEnd} of {pagination.totalItems} entries
             </p>
             <div className="flex gap-1">
-              <IconButton icon="chevron_left" variant="subtle" className="h-8 w-8 rounded-lg p-0 text-slate-400" disabled />
-              <Button variant="solid" className="h-8 w-8 rounded-lg px-0 shadow-none">
-                1
-              </Button>
-              <IconButton icon="chevron_right" variant="subtle" className="h-8 w-8 rounded-lg p-0 text-slate-400" disabled />
+              <IconButton
+                icon="chevron_left"
+                variant="subtle"
+                className="h-8 w-8 rounded-lg p-0 text-slate-400"
+                disabled={pagination.page <= 1 || isLoading}
+                onClick={() => setCurrentPage((page) => Math.max(page - 1, 1))}
+              />
+              {compactPageNumbers.map((page, index) => {
+                const previousPage = compactPageNumbers[index - 1];
+                const shouldShowGap = previousPage && page - previousPage > 1;
+
+                return (
+                  <div key={page} className="flex items-center gap-1">
+                    {shouldShowGap ? (
+                      <span className="px-2 text-sm text-slate-400">...</span>
+                    ) : null}
+                    <Button
+                      variant={page === pagination.page ? 'solid' : 'outline'}
+                      className="h-8 min-w-8 rounded-lg px-2 shadow-none"
+                      onClick={() => setCurrentPage(page)}
+                      disabled={isLoading}
+                    >
+                      {page}
+                    </Button>
+                  </div>
+                );
+              })}
+              <IconButton
+                icon="chevron_right"
+                variant="subtle"
+                className="h-8 w-8 rounded-lg p-0 text-slate-400"
+                disabled={pagination.page >= totalPages || isLoading}
+                onClick={() => setCurrentPage((page) => Math.min(page + 1, totalPages))}
+              />
             </div>
           </div>
         )}
       >
         <DataTable
-          rows={visibleBookings.length ? visibleBookings : [{ id: 'empty', empty: true }]}
+          rows={bookingRows.length ? bookingRows : [{ id: 'empty', empty: true }]}
           columns={[
             { key: 'booking-id', label: 'Booking ID', className: 'text-xs font-bold uppercase tracking-wider text-on-surface-variant' },
             { key: 'customer', label: 'Customer Name', className: 'text-xs font-bold uppercase tracking-wider text-on-surface-variant' },
